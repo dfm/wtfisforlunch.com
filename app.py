@@ -127,7 +127,7 @@ def index():
     u = login_ext.current_user
     if u.is_authenticated() and not u.is_anonymous():
         return flask.render_template("lunch.html", user=u,
-                    google_api_key=os.environ.get("GOOGLE_API_KEY", ""))
+                    google_api_key=os.environ.get("GOOGLE_WEB_KEY", ""))
     return flask.render_template("splash.html")
 
 
