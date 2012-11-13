@@ -26,12 +26,24 @@ function send_request () {
   $("#error").hide();
   $("#lunch").hide();
   $("#loading").show();
+  console.log(loc);
   $.ajax({url: "/api", data: loc, dataType: "json", success: render, error: api_error});
 }
 
 function update_location () {
-  loc = {named: $("#loc").val()};
-  send_request();
+  var address = $("#loc").val(),
+      geocoder = new google.maps.Geocoder();
+  geocoder.geocode({address: address}, function(results, code) {
+    console.log(results);
+    if (code == google.maps.GeocoderStatus.OK) {
+      var geomloc = results[0].geometry.location;
+      console.log(geomloc);
+      loc = {latitude: geomloc.Ya, longitude: geomloc.Za};
+    } else {
+      loc = {named: address};
+    }
+    send_request();
+  });
 }
 
 function found (position) {

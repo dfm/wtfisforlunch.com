@@ -118,9 +118,12 @@ login_manager.setup_app(app)
 
 @app.route("/")
 def index():
+    return flask.render_template("over.html")
+
     u = login_ext.current_user
     if u.is_authenticated() and not u.is_anonymous():
-        return flask.render_template("lunch.html", user=u)
+        return flask.render_template("lunch.html", user=u,
+                    google_api_key=os.environ.get("GOOGLE_API_KEY", ""))
     return flask.render_template("splash.html")
 
 

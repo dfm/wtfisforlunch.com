@@ -36,10 +36,15 @@
     <p><a href="{{ url_for(".logout") }}">Get me the fuck outta here.</a></p>
 </div>
 
+<div id="yelp-banner">
+    <a href="http://www.yelp.com"><img src="{{ url_for(".static", filename="yelp.png") }}"></a>
+</div>
+
 {% endblock %}
 
 {% block scripts %}
 
+<script src="https://maps.googleapis.com/maps/api/js?key={{ google_api_key }}&sensor=true"></script>
 <script src="{{ url_for(".static", filename="zepto.min.js") }}"></script>
 <script src="{{ url_for(".static", filename="locate.js") }}"></script>
 
