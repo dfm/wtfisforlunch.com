@@ -107,6 +107,7 @@ def before_request():
     c.ensure_index("rid")
     c.ensure_index("date")
     c.ensure_index("followed_up")
+    c.ensure_index("proposed")
 
 
 @app.teardown_request
@@ -142,8 +143,13 @@ def about():
 # ==========================================================================
 
 @app.route("/api")
+@app.route("/api/<vid>")
 @login_ext.login_required
-def api():
+def api(vid=None):
+    if vid is not None:
+        v = Visit.from_id(vid)
+        v.set_proposed(0)
+
     # Load the categories.
     with app.open_resource("static/cats.json") as f:
         cats = json.load(f)
@@ -153,7 +159,6 @@ def api():
 
     # First, parse the location.
     a = flask.request.args
-    print a
     if "longitude" in a and "latitude" in a:
         payload["location"] = "{0},{1}".format(a.get("latitude"),
                                                a.get("longitude"))
@@ -190,7 +195,7 @@ def api():
     res = Resto.from_id(choice.get("id", None))
     if res is None:
         payload = {"key": google_api_key, "sensor": "true",
-                "reference": choice["reference"]}
+                   "reference": choice["reference"]}
 
         r = requests.get(google_detail_url, params=payload)
         if r.status_code != requests.codes.ok:
@@ -206,21 +211,26 @@ def api():
         doc = data["result"]
         res = Resto.new(**doc)
 
+    u = login_ext.current_user
+    v = u.new_suggestion(res)
+
     return json.dumps({"category": cat[0] if cat is not None else "that",
+            "vid": str(v._id),
             "_id": res._id,
             "name": u"<a href=\"{0.url}\" target=\"_blank\">{0.name}</a>"
                                                         .format(res)})
 
 
-@app.route("/api/propose/<rid>")
+@app.route("/api/propose/<vid>")
 @login_ext.login_required
-def propose(rid):
-    r = Resto.from_id(rid)
-    if r is None:
-        return json.dumps({"code": 2,
-                           "message": "That place doesn't fucking exist."})
+def propose(vid):
     u = login_ext.current_user
-    u.propose_visit(r)
+    v = Visit.from_id(vid)
+    if v is None or u._id != v.uid or v.resto is None:
+        return json.dumps({"code": 2,
+                           "message": "WTF happened?"})
+    r = v.resto
+    v.set_proposed(1)
 
     # Send the directions email.
     msg = """Hey {0.fullname},
@@ -251,6 +261,8 @@ _@wtfisforlunch.com
 @login_ext.login_required
 def update_visit(vid, val):
     v = Visit.from_id(vid)
+    if v is None:
+        return "Failure"
     v.add_rating(val)
     return "Success"
 

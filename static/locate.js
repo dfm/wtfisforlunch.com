@@ -1,5 +1,6 @@
 var loc = null,
-    restoid = null;
+    restoid = null,
+    visitid = null;
 
 
 // =========================================================================
@@ -20,6 +21,7 @@ function render (data, code, xhr) {
   $("#lunch h1").html(data.name);
 
   restoid = data._id;
+  visitid = data.vid;
 }
 
 function error(message) {
@@ -31,7 +33,8 @@ function error(message) {
 }
 
 function api_error(xhr) {
-  error("The server responded with a " + xhr.status + ".");
+  if (xhr.status != 0)
+    error("The server responded with a " + xhr.status + ".");
 }
 
 function send_request (why) {
@@ -40,9 +43,10 @@ function send_request (why) {
   $("#lunch").hide();
   $("#loading").show();
 
-  var payload = loc;
-  if (arguments.length) payload["reason"] = why;
-  $.ajax({url: "/api", data: payload, dataType: "json", success: render,
+  var payload = loc,
+      u = "/api";
+  if (arguments.length && visitid !== null) u += "/" + visitid
+  $.ajax({url: u, data: payload, dataType: "json", success: render,
           error: api_error});
 }
 
@@ -93,7 +97,7 @@ function proposed(data) {
 }
 
 function fuckyeah() {
-  $.ajax({url: "/api/propose/" + restoid, dataType: "json",
+  $.ajax({url: "/api/propose/" + visitid, dataType: "json",
           success: proposed, error: api_error});
   $("#havefun").show();
   $("#effyeah").hide();

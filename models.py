@@ -60,7 +60,7 @@ class Visit(object):
     @classmethod
     def new(cls, user, resto):
         doc = {"rid": resto._id, "uid": user._id, "date": datetime.now(),
-               "proposed": True, "followed_up": False}
+               "proposed": False, "followed_up": False}
         doc["_id"] = cls.c().insert(doc)
         return cls(doc)
 
@@ -68,7 +68,14 @@ class Visit(object):
         if val == 0:
             self.c().remove({"_id": self._id})
         self.c().update({"_id": self._id}, {"$set": {"followed_up": True,
-                                            "rating": 1 if val == 1 else -1}})
+                                            "rating": 1 if val == 2 else -1}})
+
+    def set_proposed(self, val):
+        if val == 0:
+            self.c().update({"_id": self._id}, {"$set": {"proposed": True,
+                                                         "followed_up": True,
+                                                         "rating": 0}})
+        self.c().update({"_id": self._id}, {"$set": {"proposed": True}})
 
 
 class Resto(object):
@@ -161,13 +168,12 @@ class User(UserMixin):
         kwargs["_id"] = cls.c().insert(kwargs)
         return cls(kwargs)
 
-    def propose_visit(self, resto):
-        v = Visit.new(self, resto)
-        self.c().update({"_id": self._doc["_id"]},
-                        {"$push": {"proposed_visits": v._id}})
+    def new_suggestion(self, resto):
+        return Visit.new(self, resto)
 
     def find_recent(self):
-        v = list(Visit.c().find({"uid": self._id, "followed_up": False})
+        v = list(Visit.c().find({"uid": self._id, "proposed": True,
+                                                  "followed_up": False})
                           .sort([("date", pymongo.DESCENDING)]).limit(1))
         if len(v) == 0:
             return None
