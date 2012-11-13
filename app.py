@@ -161,10 +161,11 @@ def api():
 
     for i in range(5):
         try:
-            cat = cats[np.random.randint(len(cats) + 1)]
+            cat = cats[np.random.randint(len(cats) + 2)]
             payload["keyword"] = cat[0]
         except IndexError:
-            cat = ["", ""]
+            cat = None
+            payload.pop("keyword", None)
 
         r = requests.get(google_nearby_url, params=payload)
         if r.status_code != requests.codes.ok:
@@ -200,7 +201,7 @@ def api():
 
     res = data["result"]
 
-    return json.dumps({"category": cat[0],
+    return json.dumps({"category": cat[0] if cat is not None else "that",
             "name": u"<a href=\"{url}\" target=\"_blank\">{name}</a>"
                                                         .format(**res)})
 

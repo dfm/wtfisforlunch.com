@@ -48,11 +48,11 @@ input[type="text"] {
     margin: 0 10px;
 }
 
-#options {
+.options {
     padding-top: 10px;
 }
 
-#options ul {
+.options ul {
     margin: 0;
     padding: 0;
     list-style: none;
@@ -60,7 +60,7 @@ input[type="text"] {
     font-weight: 600;
 }
 
-#options ul li {
+.options ul li {
     text-align: center;
     margin: 0 0 5px;
     padding: 0;
