@@ -20,6 +20,9 @@ class User(UserMixin):
     def get_auth_token(self):
         return self._doc["token"]
 
+    def is_active(self):
+        return self._doc.get("active", False)
+
     @classmethod
     def new(cls, **kwargs):
         c = flask.g.db.users
