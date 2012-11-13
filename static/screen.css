@@ -4,7 +4,7 @@ body {
     font-family: "Helvetica Neue", Helvetica, sans-serif;
     font-size: 12px;
     font-weight: 600;
-    color: #333;
+    color: #222;
 }
 
 a {
@@ -43,7 +43,7 @@ form {
 input[type="text"] {
     outline: none;
     border: 0;
-    border-bottom: 1px solid #333;
+    border-bottom: 1px solid #222;
     padding: 3px 5px;
     margin: 0 10px;
 }
@@ -82,9 +82,9 @@ input[type="text"] {
     font-weight: 600;
 }
 
-#yelp-banner {
+#google-banner {
     position: fixed;
-    padding: 10px;
+    margin: 8px 8px 2px;
     top: 0;
     right: 0;
 }

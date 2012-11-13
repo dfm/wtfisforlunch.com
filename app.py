@@ -25,6 +25,12 @@ yelp_api_auth = OAuth1(unicode(os.environ["API_CKEY"]),
                        unicode(os.environ["API_TOKEN"]),
                        unicode(os.environ["API_TSEC"]))
 
+google_nearby_url = \
+        u"https://maps.googleapis.com/maps/api/place/nearbysearch/json"
+google_detail_url = \
+        u"https://maps.googleapis.com/maps/api/place/details/json"
+google_api_key = unicode(os.environ["GOOGLE_API_KEY"])
+
 
 # ==========================================================================
 #                                                                USER LOGINS
@@ -119,11 +125,10 @@ login_manager.setup_app(app)
 @app.route("/")
 def index():
     u = login_ext.current_user
-    if u.is_authenticated() and u.is_active() and not u.is_anonymous():
+    if u.is_authenticated() and not u.is_anonymous():
         return flask.render_template("lunch.html", user=u,
                     google_api_key=os.environ.get("GOOGLE_API_KEY", ""))
-    return flask.render_template("over.html")
-    # return flask.render_template("splash.html")
+    return flask.render_template("splash.html")
 
 
 @app.route("/about")
@@ -138,56 +143,66 @@ def about():
 @app.route("/api")
 @login_ext.login_required
 def api():
-    payload = {"sort_mode": 2}
-
-    # First, parse the location.
-    a = flask.request.args
-    if "longitude" in a and "latitude" in a:
-        payload["ll"] = "{0},{1}".format(a.get("latitude"), a.get("longitude"))
-        if "accuracy" in a:
-            payload["ll"] += ",{0}".format(a.get("accuracy"))
-    elif "named" in a:
-        payload["location"] = a.get("named")
-    else:
-        return json.dumps({"code": 1,
-                           "message": "You must provide a location."})
-
     # Load the categories.
     with app.open_resource("static/cats.json") as f:
         cats = json.load(f)
 
-    # Try to make sure that we actually get some restaurants!
+    payload = {"key": google_api_key, "sensor": "true", "types": "restaurant",
+               "radius": 3000}
+
+    # First, parse the location.
+    a = flask.request.args
+    if "longitude" in a and "latitude" in a:
+        payload["location"] = "{0},{1}".format(a.get("latitude"),
+                                               a.get("longitude"))
+    else:
+        return json.dumps({"code": 1,
+                           "message": "You must provide a location."})
+
     for i in range(5):
-        cat = cats[np.random.randint(len(cats))]
-        payload["category_filter"] = cat[1]
-        r = requests.get(yelp_api_url, params=payload, auth=yelp_api_auth)
+        try:
+            cat = cats[np.random.randint(len(cats) + 1)]
+            payload["keyword"] = cat[0]
+        except IndexError:
+            cat = ["", ""]
+
+        r = requests.get(google_nearby_url, params=payload)
         if r.status_code != requests.codes.ok:
             return json.dumps({"code": 2,
-                               "message": "Yelp's API seems to be dead."})
+                            "message": "Google's API seems to be dead."})
 
         data = r.json
-        if "error" in data:
-            return json.dumps({"code": 2,
-                               "message": "Yelp responded with: '{0}'."
-                                                    .format(data["text"])})
 
-        if int(data["total"]) > 1:
+        res = data["results"]
+        if len(res) > 0:
             break
 
-    # Fail 'gracefully' if we don't find any restaurants.
-    if int(data["total"]) < 1:
-        return json.dumps({"code": 1,
-                           "message": "Where are all the restaurants?"})
+    # Fail 'elegantly' if that doesn't work.
+    if len(res) == 0:
+        return json.dumps({"code": 2,
+                           "message": "We couldn't find fuck all for you."})
 
-    # Get the distance, etc. for all the restaurants.
-    dist, rating, count = zip(*[(r.get("distance", 0), r.get("rating", 0),
-                                 r.get("review_count", 0))
-                                            for r in data["businesses"]])
+    choice = res[np.random.randint(len(res))]
 
-    choice = data["businesses"][np.random.randint(len(count))]
+    payload = {"key": google_api_key, "sensor": "true",
+               "reference": choice["reference"]}
+
+    r = requests.get(google_detail_url, params=payload)
+    if r.status_code != requests.codes.ok:
+        return json.dumps({"code": 2,
+                           "message": "Google's API seems to be dead."})
+
+    data = r.json
+    code = data["status"]
+    if data["status"] != "OK":
+        return json.dumps({"code": 2,
+                        "message": "Google's API said: '{0}'.".format(code)})
+
+    res = data["result"]
+
     return json.dumps({"category": cat[0],
             "name": u"<a href=\"{url}\" target=\"_blank\">{name}</a>"
-                                                        .format(**choice)})
+                                                        .format(**res)})
 
 
 if __name__ == "__main__":
