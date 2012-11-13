@@ -2,6 +2,13 @@
 
 {% block content %}
 
+{% if visit %}
+<div id="header">
+    <p>Yo. Did you end up going to <a href="{{ visit.resto.url }}" target="_blank">{{ visit.resto.name }}</a> on {{ visit.date.strftime('%b %d') }}?<br>
+    <span>Yeah and it was <a href="javascript:update_visit('{{ visit._id }}',2)">fucking great</a> / <a href="javascript:update_visit('{{ visit._id }}',1)">total shit</a> or <a href="javascript:update_visit('{{ visit._id }}',0)">fuck no</a>.</span></p>
+</div>
+{% endif %}
+
 <p>Hi {{ user.fullname }}.</p>
 
 <p id="loading">Be patient… we're loading your fucking lunch preferences.</p>
@@ -28,15 +35,11 @@
 <div id="lunch">
     <h1></h1>
     <p>is on the fucking menu for lunch.</p>
-    <p id="effyeah"><a href="javascript:fuckyeah();">Fuck yeah!</a></p>
     <p id="havefun">Enjoy.</p>
     <div class="options">
         <ul>
-            <li><i>You're not taking my goddamn advice?</i></li>
-            <li><a href="javascript:send_request('dislike');">I fucking hate that place.</a></li>
-            <li><a href="javascript:send_request('food');">I don't like that kind of food.</a></li>
-            <li><a href="javascript:send_request('far');">It's too damn far</a> / <a href="javascript:send_request('cost');">too fucking expensive</a>!</li>
-            <li><a href="javascript:send_request('feeling');">Um… I don't feel like it, dude.</a></li>
+            <li><a href="javascript:fuckyeah();">Fuck yeah.</a></li>
+            <li><a href="javascript:send_request('no');">Hell no.</a></li>
         </ul>
     </div>
 </div>

@@ -90,14 +90,19 @@ if (navigator.geolocation) {
 // =========================================================================
 
 function proposed(data) {
-  $("#havefun").show();
-  $("#effyeah").hide();
-  $("#lunch .options").hide();
 }
 
 function fuckyeah() {
   $.ajax({url: "/api/propose/" + restoid, dataType: "json",
           success: proposed, error: api_error});
+  $("#havefun").show();
+  $("#effyeah").hide();
+  $("#lunch .options").hide();
+}
+
+function update_visit(vid, val) {
+  $.ajax({url: "/api/update/" + vid + "/" + val, dataType: "json"});
+  $("#header").hide();
 }
 
 

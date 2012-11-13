@@ -56,14 +56,13 @@ input[type="text"] {
     margin: 0;
     padding: 0;
     list-style: none;
-    font-size: 16px;
-    font-weight: 600;
 }
 
 .options ul li {
-    text-align: center;
-    margin: 0 0 5px;
     padding: 0;
+    margin: 0 0 20px;
+    text-align: center;
+    font-size: 24px;
 }
 
 #footer {
@@ -80,6 +79,21 @@ input[type="text"] {
     text-align: center;
     font-size: 12px;
     font-weight: 600;
+}
+
+#header {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background-color: #ddd;
+}
+
+#header p {
+    text-align: center;
+    font-size: 14px;
+    padding: 15px 0 20px;
+    margin: 0;
+    line-height: 1.55;
 }
 
 #google-banner {

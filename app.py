@@ -12,7 +12,8 @@ import pymongo
 
 import numpy as np
 
-from models import Resto, User
+from models import Visit, Resto, User
+from email_utils import send_msg
 
 
 app = flask.Flask(__name__)
@@ -97,9 +98,15 @@ def before_request():
     flask.g.db = flask.g.dbc[dbname]
 
     # Indexing.
-    c = flask.g.db.users
+    c = User.c()
     c.ensure_index("token")
     c.ensure_index("open_id")
+
+    c = Visit.c()
+    c.ensure_index("uid")
+    c.ensure_index("rid")
+    c.ensure_index("date")
+    c.ensure_index("followed_up")
 
 
 @app.teardown_request
@@ -120,7 +127,8 @@ def index():
     u = login_ext.current_user
     if u.is_authenticated() and not u.is_anonymous():
         return flask.render_template("lunch.html", user=u,
-                    google_api_key=os.environ.get("GOOGLE_WEB_KEY", ""))
+                    google_api_key=os.environ.get("GOOGLE_WEB_KEY", ""),
+                    visit=u.find_recent())
     return flask.render_template("splash.html")
 
 
@@ -196,8 +204,7 @@ def api():
                         "message": "Google's API said: '{0}'.".format(code)})
 
         doc = data["result"]
-        keys = ["id", "rating", "url", "name", "geometry"]
-        res = Resto.new(**dict([(k, doc.get(k, None)) for k in keys]))
+        res = Resto.new(**doc)
 
     return json.dumps({"category": cat[0] if cat is not None else "that",
             "_id": res._id,
@@ -214,7 +221,38 @@ def propose(rid):
                            "message": "That place doesn't fucking exist."})
     u = login_ext.current_user
     u.propose_visit(r)
+
+    # Send the directions email.
+    msg = """Hey {0.fullname},
+
+It looks like you're heading to {1.name} at {1.formatted_address}.
+
+For more info about this restaurant: {1.url}
+
+Fucking enjoy it.
+
+Sincerely,
+The Lunch Robot
+_@wtfisforlunch.com
+
+""".format(u, r)
+
+    try:
+        send_msg(u.email, msg, "Lunch at {0}".format(r.name))
+    except Exception as e:
+        print "EMAIL ERROR: ", e
+        return json.dumps({"code": 2,
+                        "message": "I couldn't send you a fucking reminder."})
+
     return json.dumps({"code": 0})
+
+
+@app.route("/api/update/<vid>/<int:val>")
+@login_ext.login_required
+def update_visit(vid, val):
+    v = Visit.from_id(vid)
+    v.add_rating(val)
+    return "Success"
 
 
 if __name__ == "__main__":
