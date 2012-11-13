@@ -17,7 +17,6 @@ from user import User
 
 
 app = flask.Flask(__name__)
-app.debug = True
 app.secret_key = os.environ.get("SECRET", "development secret key")
 
 yelp_api_url = u"http://api.yelp.com/v2/search"

@@ -3,6 +3,7 @@ __all__ = ["User"]
 
 import os
 
+import flask
 from flask.ext.login import UserMixin
 from SimpleAES import SimpleAES
 
@@ -21,7 +22,8 @@ class User(UserMixin):
 
     @classmethod
     def new(cls, **kwargs):
+        c = flask.g.db.users
         aes = SimpleAES(os.environ.get("AES_SECRET", "aes secret key"))
         kwargs["email"] = aes.encrypt(kwargs["email"])
-        kwargs["_id"] = cls.c().insert(kwargs, safe=True)
+        kwargs["_id"] = c.insert(kwargs, safe=True)
         return cls(kwargs)
