@@ -84,8 +84,10 @@ function loc_error (msg) {
   if (arguments.length && typeof msg === "string") $("#location h1").text(msg);
 }
 
-if (navigator.geolocation) {
-  navigator.geolocation.getCurrentPosition(found, loc_error);
+function usegeo() {
+  if ("geolocation" in navigator)
+    navigator.geolocation.getCurrentPosition(found, loc_error);
+  loc_error();
 }
 
 
@@ -115,8 +117,9 @@ function update_visit(vid, val) {
 // =========================================================================
 
 $(function () {
-  $("#loading").show();
+  // $("#loading").show();
   $("#location").hide();
   $("#error").hide();
   $("#lunch").hide();
+  usegeo();
 });
