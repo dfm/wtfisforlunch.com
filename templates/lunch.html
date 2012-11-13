@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<p>Hi {{ user.fullname }}.</p>
+
+<p id="loading">Be patient… we're loading your fucking lunch preferences.</p>
+
+<div id="location">
+    <h1>Where the fuck are you?</h1>
+    <form action="javascript:update_location();">
+        <p>
+            I'm in <input type="text" size="20" name="loc" id="loc" placeholder="NYC"></input>.
+        </p>
+    </form>
+</div>
+
+<div id="error">
+    <h1></h1>
+    <p></p>
+</div>
+
+<div id="lunch">
+    <h1></h1>
+    <p>is on the fucking menu for lunch!</p>
+    <div id="options">
+        <ul>
+            <li>But…</li>
+            <li><a href="javascript:send_request();">I don't feel like <span id="type"></span>.</a></li>
+            <li><a href="javascript:send_request();">It's too damn far!</a></li>
+        </ul>
+    </div>
+</div>
+
+<div id="footer">
+    <p><a href="{{ url_for(".logout") }}">Get me the fuck outta here.</a></p>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+
+<script src="{{ url_for(".static", filename="zepto.min.js") }}"></script>
+<script src="{{ url_for(".static", filename="locate.js") }}"></script>
+
+{% endblock %}
