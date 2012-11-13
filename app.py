@@ -243,7 +243,7 @@ Fucking enjoy it.
 
 Sincerely,
 The Lunch Robot
-_@wtfisforlunch.com
+robot@wtfisforlunch.com
 
 """.format(u, r)
 

@@ -8,7 +8,7 @@ from email.mime.text import MIMEText
 
 
 # email config
-from_email = "Lunch Robot <_@wtfisforlunch.com>"
+from_email = "Lunch Robot <robot@wtfisforlunch.com>"
 
 
 def _connect():
