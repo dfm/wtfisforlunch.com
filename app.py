@@ -148,7 +148,7 @@ def api():
         cats = json.load(f)
 
     payload = {"key": google_api_key, "sensor": "true", "types": "restaurant",
-               "radius": 3000}
+               "radius": 1500}
 
     # First, parse the location.
     a = flask.request.args
