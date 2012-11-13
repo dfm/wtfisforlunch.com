@@ -9,11 +9,10 @@ import requests
 from requests.auth import OAuth1
 
 import pymongo
-from bson.objectid import ObjectId
 
 import numpy as np
 
-from user import User
+from models import Resto, User
 
 
 app = flask.Flask(__name__)
@@ -44,20 +43,12 @@ login_manager.login_view = ".login"
 
 @login_manager.user_loader
 def load_user(_id):
-    c = flask.g.db.users
-    u = c.find_one({"_id": ObjectId(_id)})
-    if u is None:
-        return None
-    return User(u)
+    return User.from_id(_id)
 
 
 @login_manager.token_loader
 def load_user_token(token):
-    c = flask.g.db.users
-    u = c.find_one({"token": token})
-    if u is None:
-        return None
-    return User(u)
+    return User.from_token(token)
 
 
 @app.route("/login")
@@ -74,9 +65,8 @@ def login():
 
 @oid.after_login
 def after_login(resp):
-    c = flask.g.db.users
-    u = c.find_one({"openid": resp.identity_url})
-    if u is None:
+    user = User.from_openid(resp.identity_url)
+    if user is None:
         # Create a new user account.
         user = User.new(**{"email": resp.email,
                            "fullname": resp.fullname,
@@ -84,8 +74,6 @@ def after_login(resp):
                                                                 resp.email,
                                                                 os.urandom(4)),
                            "openid": resp.identity_url})
-    else:
-        user = User(u)
     login_ext.login_user(user)
     return flask.redirect(oid.get_next_url())
 
@@ -107,6 +95,11 @@ def before_request():
     flask.g.dbc = pymongo.Connection(host=uri)
     dbname = pymongo.uri_parser.parse_uri(uri).get("database", "wtflunch")
     flask.g.db = flask.g.dbc[dbname]
+
+    # Indexing.
+    c = flask.g.db.users
+    c.ensure_index("token")
+    c.ensure_index("open_id")
 
 
 @app.teardown_request
@@ -152,12 +145,13 @@ def api():
 
     # First, parse the location.
     a = flask.request.args
+    print a
     if "longitude" in a and "latitude" in a:
         payload["location"] = "{0},{1}".format(a.get("latitude"),
                                                a.get("longitude"))
     else:
         return json.dumps({"code": 1,
-                           "message": "You must provide a location."})
+                           "message": "The doesn't sound like a real place."})
 
     for i in range(5):
         try:
@@ -185,25 +179,42 @@ def api():
 
     choice = res[np.random.randint(len(res))]
 
-    payload = {"key": google_api_key, "sensor": "true",
-               "reference": choice["reference"]}
+    res = Resto.from_id(choice.get("id", None))
+    if res is None:
+        payload = {"key": google_api_key, "sensor": "true",
+                "reference": choice["reference"]}
 
-    r = requests.get(google_detail_url, params=payload)
-    if r.status_code != requests.codes.ok:
-        return json.dumps({"code": 2,
-                           "message": "Google's API seems to be dead."})
+        r = requests.get(google_detail_url, params=payload)
+        if r.status_code != requests.codes.ok:
+            return json.dumps({"code": 2,
+                            "message": "Google's API seems to be dead."})
 
-    data = r.json
-    code = data["status"]
-    if data["status"] != "OK":
-        return json.dumps({"code": 2,
+        data = r.json
+        code = data["status"]
+        if data["status"] != "OK":
+            return json.dumps({"code": 2,
                         "message": "Google's API said: '{0}'.".format(code)})
 
-    res = data["result"]
+        doc = data["result"]
+        keys = ["id", "rating", "url", "name", "geometry"]
+        res = Resto.new(**dict([(k, doc.get(k, None)) for k in keys]))
 
     return json.dumps({"category": cat[0] if cat is not None else "that",
-            "name": u"<a href=\"{url}\" target=\"_blank\">{name}</a>"
-                                                        .format(**res)})
+            "_id": res._id,
+            "name": u"<a href=\"{0.url}\" target=\"_blank\">{0.name}</a>"
+                                                        .format(res)})
+
+
+@app.route("/api/propose/<rid>")
+@login_ext.login_required
+def propose(rid):
+    r = Resto.from_id(rid)
+    if r is None:
+        return json.dumps({"code": 2,
+                           "message": "That place doesn't fucking exist."})
+    u = login_ext.current_user
+    u.propose_visit(r)
+    return json.dumps({"code": 0})
 
 
 if __name__ == "__main__":
