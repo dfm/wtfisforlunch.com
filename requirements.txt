@@ -6,3 +6,4 @@ numpy==1.6.2
 requests==0.14.2
 pymongo==2.3
 SimpleAES==1.0
+newrelic
