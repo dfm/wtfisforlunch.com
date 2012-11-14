@@ -39,7 +39,12 @@ p {
     font-size: 24px;
 }
 
+#error, #lunch {
+    display: none;
+}
+
 p#loading {
+    display: none;
     color: #888;
     font-weight: 400;
     font-size: 18px;
@@ -55,6 +60,10 @@ input[type="text"] {
     border-bottom: 1px solid #222;
     padding: 3px 5px;
     margin: 0 10px;
+}
+
+#locconf {
+    display: none;
 }
 
 .options {

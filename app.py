@@ -233,7 +233,7 @@ def propose(vid):
     v.set_proposed(1)
 
     # Send the directions email.
-    msg = """Hey {0.fullname},
+    text = """Hey {0.fullname},
 
 It looks like you're heading to {1.name} at {1.formatted_address}.
 
@@ -247,8 +247,31 @@ robot@wtfisforlunch.com
 
 """.format(u, r)
 
+    img_url = "http://maps.googleapis.com/maps/api/staticmap?zoom=15&" \
+              "size=400x200&markers={lat},{lng}&scale=2&sensor=false" \
+              .format(**r.geometry["location"])
+
+    html = """<p>Hey {0.fullname},</p>
+
+<p>Looks like you're heading to <a href="{1.url}">{1.name}</a> for lunch
+today.</p>
+
+<p style="text-align: center;"><strong>{1.name}</strong><br>
+{1.formatted_address}</p>
+
+<p style="text-align: center;"><img src="{2}" style="width: 400px;"></p>
+
+<p>Fucking enjoy it.</p>
+
+<p>Sincerely,<br>
+The Lunch Robot<br>
+<a href="mailto:robot@wtfisforlunch.com">robot@wtfisforlunch.com</a></p>
+
+""".format(u, r, img_url)
+
     try:
-        send_msg(u.email, msg, "Lunch at {0}".format(r.name))
+        send_msg("{0.fullname} <{0.email}>".format(u), text,
+                 "Lunch at {0}".format(r.name), html=html)
     except Exception as e:
         print "EMAIL ERROR: ", e
         return json.dumps({"code": 2,

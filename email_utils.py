@@ -24,12 +24,14 @@ def _connect():
     return s
 
 
-def send_msg(email, text, subj):
+def send_msg(email, text, subj, html):
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subj
     msg["From"] = from_email
     msg["To"] = email
     msg.attach(MIMEText(text, "plain"))
+    if html is not None:
+        msg.attach(MIMEText(html, "html"))
     s = _connect()
     s.sendmail(msg["From"], msg["To"], msg.as_string())
     s.quit()

@@ -59,16 +59,17 @@ function update_location () {
   var address = $("#loc").val(),
       geocoder = new google.maps.Geocoder();
   geocoder.geocode({address: address}, function(results, code) {
-    console.log(results);
     if (code == google.maps.GeocoderStatus.OK) {
       var geomloc = results[0].geometry.location;
-      console.log(geomloc);
       loc = {latitude: geomloc.Ya, longitude: geomloc.Za};
+      $("#locconf span").text(results[0].formatted_address);
+      $("#locconf").show();
     } else {
-      loc = {named: address};
+      loc_error("What the fuck kind of address is that?");
     }
-    send_request();
   });
+  $("#locform").hide();
+  $("#usegeo").hide();
 }
 
 function found (position) {
@@ -78,10 +79,14 @@ function found (position) {
 }
 
 function loc_error (msg) {
+  $("#usegeo").hide();
+  $("#locconf").hide();
+  $("#locform").show();
   $("#location").show();
   $("#loading").hide();
   $("#error").hide();
   if (arguments.length && typeof msg === "string") $("#location h1").text(msg);
+  else $("#location h1").text("Where the fuck are you?");
 }
 
 function usegeo() {
@@ -117,9 +122,8 @@ function update_visit(vid, val) {
 // =========================================================================
 
 $(function () {
-  // $("#loading").show();
-  $("#location").hide();
+  $("#loading").hide();
+  $("#location").show();
   $("#error").hide();
   $("#lunch").hide();
-  usegeo();
 });

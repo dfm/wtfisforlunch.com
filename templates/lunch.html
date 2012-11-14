@@ -15,12 +15,13 @@
 
 <div id="location">
     <h1>Where the fuck are you?</h1>
-    <form action="javascript:update_location();">
+    <form id="locform" action="javascript:update_location();">
         <p>
-            I'm in <input type="text" size="20" name="loc" id="loc" placeholder="NYC"></input>.
+            I'm in <input type="text" size="20" name="loc" id="loc" placeholder="City, Zipcode, etc."></input>.
         </p>
     </form>
-    <p><a href="javascript:usegeo()">Use your computer's current location.</a></p>
+    <p id="locconf"><span></span>? <a href="javascript:send_request()">Yep</a>. <a href="javascript:loc_error()">Nope</a>.</p>
+    <p id="usegeo"><a href="javascript:usegeo()">Use your computer's current location.</a></p>
 </div>
 
 <div id="error">
@@ -59,6 +60,6 @@
 
 <script src="https://maps.googleapis.com/maps/api/js?key={{ google_api_key }}&sensor=true"></script>
 <script src="{{ url_for(".static", filename="zepto.min.js") }}"></script>
-<script src="{{ url_for(".static", filename="locate.js") }}?v3"></script>
+<script src="{{ url_for(".static", filename="locate.js") }}?v4"></script>
 
 {% endblock %}
