@@ -300,20 +300,20 @@ def get_restaurant(loc):
         x2 = lnglat2xyz(*loc)
         dist = np.sqrt(2 * (rearth * rearth - np.dot(x1, x2)))
 
-        dprob = (np.log10(dist) + 1) / (np.log10(5) + 1)
-        dprob = (1 - dprob) * (1 - dprob)
-
         # And the rating.
         rating = choice.get("rating", None)
 
         # Compute the probability.
         rnd = np.random.rand()
         if rating is not None and 0 < rating <= 5:
-            rprob = 0.49 + (0.54 * np.tanh(0.8 * (rating - 2.8)))
+            a = 0.5 * dist
+            b = 6.0 + dist
+            c = 100.0 + 450.0 * dist
+            d = (rating - a) ** b
+            prob = d / (d + c)
         else:
-            rprob = np.random.rand() * 0.005
+            prob = np.random.rand() * 0.0
 
-        prob = rprob * dprob
         if prob > thebest[0]:
             thebest = (prob, choice)
 
