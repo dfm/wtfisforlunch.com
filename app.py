@@ -1,4 +1,5 @@
 import os
+import re
 import json
 
 import flask
@@ -150,73 +151,21 @@ def api(vid=None):
         v = Visit.from_id(vid)
         v.set_proposed(0)
 
-    # Load the categories.
-    with app.open_resource("static/cats.json") as f:
-        cats = json.load(f)
-
-    payload = {"key": google_api_key, "sensor": "true", "types": "restaurant",
-               "radius": 1500}
-
     # First, parse the location.
     a = flask.request.args
     if "longitude" in a and "latitude" in a:
-        payload["location"] = "{0},{1}".format(a.get("latitude"),
-                                               a.get("longitude"))
+        loc = np.array((a.get("longitude"), a.get("latitude")), dtype=float)
     else:
         return json.dumps({"code": 1,
                            "message": "The doesn't sound like a real place."})
 
-    for i in range(5):
-        try:
-            cat = cats[np.random.randint(len(cats) + 2)]
-            payload["keyword"] = cat[0]
-        except IndexError:
-            cat = None
-            payload.pop("keyword", None)
-
-        r = requests.get(google_nearby_url, params=payload)
-        if r.status_code != requests.codes.ok:
-            return json.dumps({"code": 2,
-                            "message": "Google's API seems to be dead."})
-
-        data = r.json
-
-        res = data["results"]
-        if len(res) > 0:
-            break
-
-    # Fail 'elegantly' if that doesn't work.
-    if len(res) == 0:
-        return json.dumps({"code": 2,
+    res, v, dist, rating, prob = get_restaurant(loc)
+    if res is None:
+        return json.dumps({"code": 3,
                            "message": "We couldn't find fuck all for you."})
 
-    choice = res[np.random.randint(len(res))]
-
-    res = Resto.from_id(choice.get("id", None))
-    if res is None:
-        payload = {"key": google_api_key, "sensor": "true",
-                   "reference": choice["reference"]}
-
-        r = requests.get(google_detail_url, params=payload)
-        if r.status_code != requests.codes.ok:
-            return json.dumps({"code": 2,
-                            "message": "Google's API seems to be dead."})
-
-        data = r.json
-        code = data["status"]
-        if data["status"] != "OK":
-            return json.dumps({"code": 2,
-                        "message": "Google's API said: '{0}'.".format(code)})
-
-        doc = data["result"]
-        res = Resto.new(**doc)
-
-    u = login_ext.current_user
-    v = u.new_suggestion(res)
-
-    return json.dumps({"category": cat[0] if cat is not None else "that",
-            "vid": str(v._id),
-            "_id": res._id,
+    return json.dumps({"vid": str(v._id), "_id": res._id,
+            "distance": dist, "rating": rating, "probability": prob,
             "name": u"<a href=\"{0.url}\" target=\"_blank\">{0.name}</a>"
                                                         .format(res)})
 
@@ -249,7 +198,7 @@ robot@wtfisforlunch.com
 
     img_url = "http://maps.googleapis.com/maps/api/staticmap?zoom=15&" \
               "size=400x200&markers={lat},{lng}&scale=2&sensor=false" \
-              .format(**r.geometry["location"])
+              .format(**r.location)
 
     html = """<p>Hey {0.fullname},</p>
 
@@ -290,6 +239,127 @@ def update_visit(vid, val):
     return "Success"
 
 
+# ==========================================================================
+#                                                                      MAGIC
+# ==========================================================================
+
+rearth = 6378.1  # km
+
+
+def lnglat2xyz(lng, lat):
+    lng, lat = np.radians(lng), np.radians(lat)
+    clat = np.cos(lat)
+    return rearth * np.array([clat * np.cos(lng),
+                              clat * np.sin(lng),
+                              np.sin(lat)])
+
+
+def xyz2lnglat(xyz):
+    return np.degrees(np.arctan2(xyz[1], xyz[0])), \
+           np.degrees(np.arctan2(xyz[2], np.sqrt(np.dot(xyz[:-1], xyz[:-1]))))
+
+
+def propose_position(ll0, sigma):
+    x = lnglat2xyz(*ll0) + sigma * np.random.randn(3)
+    return xyz2lnglat(x)
+
+
+def get_restaurant(loc):
+    payload = {"key": google_api_key,
+               "sensor": "false",
+               "types": "restaurant",
+               "rankby": "distance"}
+
+    for i in range(5):
+        # Choose a random position.
+        payload["location"] = "{1},{0}".format(*propose_position(loc, 0.75))
+
+        # Do the search.
+        r = requests.get(google_nearby_url, params=payload)
+        if r.status_code != requests.codes.ok:
+            return None
+
+        data = r.json["results"]
+        if len(data) > 0:
+            break
+
+    # Fail 'elegantly' if that doesn't work.
+    if len(data) == 0:
+        return None
+
+    # Accept the proposal depending on the distance and ranking relationship.
+    thebest = (0.0, None)
+    inds = np.arange(len(data))
+    np.random.shuffle(inds)
+    for i, ind in enumerate(inds):
+        choice = data[ind]
+
+        # Compute the distance.
+        cloc = choice["geometry"]["location"]
+        x1 = lnglat2xyz(cloc["lng"], cloc["lat"])
+        x2 = lnglat2xyz(*loc)
+        dist = np.sqrt(2 * (rearth * rearth - np.dot(x1, x2)))
+
+        dprob = (np.log10(dist) + 1) / (np.log10(5) + 1)
+        dprob = (1 - dprob) * (1 - dprob)
+
+        # And the rating.
+        rating = choice.get("rating", None)
+
+        # Compute the probability.
+        rnd = np.random.rand()
+        if rating is not None and 0 < rating <= 5:
+            rprob = 0.49 + (0.54 * np.tanh(0.8 * (rating - 2.8)))
+        else:
+            rprob = np.random.rand() * 0.005
+
+        prob = rprob * dprob
+        if prob > thebest[0]:
+            thebest = (prob, choice)
+
+        if rnd <= prob:
+            thebest = (0, None)
+            break
+
+    if thebest[1] is not None:
+        prob, restaurant = thebest
+
+    print i, "rejections. Final probability: ", prob
+
+    # Is the restaurant cached?
+    restaurant = Resto.from_id(choice["id"])
+
+    # If not, fetch the details and grab the price.
+    if restaurant is None:
+        pld = {"key": google_api_key, "sensor": "false",
+                "reference": choice["reference"]}
+
+        r = requests.get(google_detail_url, params=pld)
+        if r.status_code != requests.codes.ok:
+            return None
+
+        details = r.json
+        if details["status"] != "OK":
+            return None
+
+        details = details["result"]
+
+        # Extract the fields.
+        fields = ["name", "url", "formatted_address", "rating", "website",
+                    "opening_hours", "formatted_phone_number", "id"]
+        doc = dict([(k, details.get(k, None)) for k in fields])
+        doc["location"] = details.get("geometry", {}).get("location", None)
+
+        restaurant = Resto.new(**doc)
+
+    u = login_ext.current_user
+    visit = u.new_suggestion(restaurant, dist, prob)
+
+    return restaurant, visit, dist, rating, prob
+
+
 if __name__ == "__main__":
+    # lng, lat = 360 * np.random.rand() - 180, 180 * np.random.rand() - 90
+    # print (lng, lat), xyz2lnglat(lnglat2xyz(lng, lat))
     app.debug = True
     app.run()

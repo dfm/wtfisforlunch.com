@@ -10,6 +10,7 @@ var loc = null,
 function render (data, code, xhr) {
   if (data.code == 1) return loc_error(data.message);
   if (data.code == 2) return error(data.message);
+  if (data.code == 3) return error(data.message, "You'd better just stay home…");
 
   $("#loading").hide();
 
@@ -20,15 +21,27 @@ function render (data, code, xhr) {
   $("#lunch").show();
   $("#lunch h1").html(data.name);
 
+  var d = 0.621 * data.distance;
+  if (d > 0.5) {
+    var rd = "about half a mile";
+    if (d > 0.75 && d <= 1) rd = "a little under a mile";
+    else if (d <= 1.5) rd = "a little over a mile";
+    else rd = d.toFixed(1) + " miles";
+    $("#prefix").show().text("It's a fucking hike (" + rd + ") but…");
+  } else $("#prefix").hide();
+
   restoid = data._id;
   visitid = data.vid;
 }
 
-function error(message) {
+function error(message, header) {
   $("#lunch").hide();
   $("#loading").hide();
   $("#error").show();
-  $("#error h1").text("You broke the internet!");
+  if (arguments.length >= 2)
+    $("#error h1").text(header);
+  else
+    $("#error h1").text("You broke the internet!");
   $("#error p").text(message);
 }
 

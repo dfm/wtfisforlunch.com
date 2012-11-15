@@ -58,8 +58,9 @@ class Visit(object):
         return cls(u)
 
     @classmethod
-    def new(cls, user, resto):
+    def new(cls, user, resto, dist, prob):
         doc = {"rid": resto._id, "uid": user._id, "date": datetime.now(),
+               "distance": dist, "probability": prob,
                "proposed": False, "followed_up": False}
         doc["_id"] = cls.c().insert(doc)
         return cls(doc)
@@ -168,8 +169,8 @@ class User(UserMixin):
         kwargs["_id"] = cls.c().insert(kwargs)
         return cls(kwargs)
 
-    def new_suggestion(self, resto):
-        return Visit.new(self, resto)
+    def new_suggestion(self, resto, dist, prob):
+        return Visit.new(self, resto, dist, prob)
 
     def find_recent(self):
         v = list(Visit.c().find({"uid": self._id, "proposed": True,

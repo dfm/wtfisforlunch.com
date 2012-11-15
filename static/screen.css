@@ -66,6 +66,10 @@ input[type="text"] {
     display: none;
 }
 
+#prefix {
+    display: none;
+}
+
 .options {
     padding-top: 10px;
 }
