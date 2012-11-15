@@ -1,5 +1,5 @@
 import os
-import re
+# import re
 import json
 
 import flask
@@ -7,7 +7,7 @@ from flask.ext.openid import OpenID, COMMON_PROVIDERS
 import flask.ext.login as login_ext
 
 import requests
-from requests.auth import OAuth1
+# from requests.auth import OAuth1
 
 import pymongo
 
@@ -20,11 +20,11 @@ from email_utils import send_msg
 app = flask.Flask(__name__)
 app.secret_key = os.environ.get("SECRET", "development secret key")
 
-yelp_api_url = u"http://api.yelp.com/v2/search"
-yelp_api_auth = OAuth1(unicode(os.environ["API_CKEY"]),
-                       unicode(os.environ["API_CSEC"]),
-                       unicode(os.environ["API_TOKEN"]),
-                       unicode(os.environ["API_TSEC"]))
+# yelp_api_url = u"http://api.yelp.com/v2/search"
+# yelp_api_auth = OAuth1(unicode(os.environ["API_CKEY"]),
+#                        unicode(os.environ["API_CSEC"]),
+#                        unicode(os.environ["API_TOKEN"]),
+#                        unicode(os.environ["API_TSEC"]))
 
 google_nearby_url = \
         u"https://maps.googleapis.com/maps/api/place/nearbysearch/json"
