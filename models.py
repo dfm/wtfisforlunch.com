@@ -71,11 +71,7 @@ class Visit(object):
         self.c().update({"_id": self._id}, {"$set": {"followed_up": True,
                                             "rating": 1 if val == 2 else -1}})
 
-    def set_proposed(self, val):
-        if val == 0:
-            self.c().update({"_id": self._id}, {"$set": {"proposed": True,
-                                                         "followed_up": True,
-                                                         "rating": 0}})
+    def set_proposed(self):
         self.c().update({"_id": self._id}, {"$set": {"proposed": True}})
 
 

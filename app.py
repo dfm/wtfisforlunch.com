@@ -149,7 +149,7 @@ def about():
 def api(vid=None):
     if vid is not None:
         v = Visit.from_id(vid)
-        v.set_proposed(0)
+        v.add_rating(0)
 
     # First, parse the location.
     a = flask.request.args
@@ -179,7 +179,7 @@ def propose(vid):
         return json.dumps({"code": 2,
                            "message": "WTF happened?"})
     r = v.resto
-    v.set_proposed(1)
+    v.set_proposed()
 
     # Send the directions email.
     text = """Hey {0.fullname},
