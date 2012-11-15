@@ -17,6 +17,7 @@ class Visit(object):
         assert kwargs is not None
         self._doc = kwargs
         self._resto = None
+        self._user = None
 
     def __getitem__(self, k):
         return self._doc[k]
@@ -29,6 +30,12 @@ class Visit(object):
         if self._resto is None:
             self._resto = Resto.from_id(self.rid)
         return self._resto
+
+    @property
+    def user(self):
+        if self._user is None:
+            self._user = User.from_id(self.uid)
+        return self._user
 
     @staticmethod
     def c():

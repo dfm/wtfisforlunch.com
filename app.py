@@ -139,6 +139,23 @@ def about():
     return flask.render_template("about.html")
 
 
+@app.route("/share/<vid>")
+def share(vid):
+    v = Visit.from_id(vid)
+    if v is None:
+        flask.abort(404)
+
+    try:
+        uid = login_ext.current_user._id
+    except AttributeError:
+        pass
+    else:
+        if v.user._id == uid:
+            v.add_rating(2)
+
+    return flask.render_template("share.html", visit=v)
+
+
 # ==========================================================================
 #                                                                    THE API
 # ==========================================================================

@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<p>{{ visit.user.fullname }} fucking loved:</p>
+<h1><a href="{{ visit.resto.url }}" target="_blank">{{ visit.resto.name }}</a></h1>
+
+<div id="footer">
+    <p><a href="{{ url_for(".index") }}">WTF is for lunch?</a></p>
+</div>
+
+{% endblock %}

@@ -5,7 +5,7 @@
 {% if visit %}
 <div id="header">
     <p>Yo. Did you end up going to <a href="{{ visit.resto.url }}" target="_blank">{{ visit.resto.name }}</a> on {{ visit.date.strftime('%b %d') }}?<br>
-    <span>Yeah and it was <a href="javascript:update_visit('{{ visit._id }}',2)">fucking great</a> / <a href="javascript:update_visit('{{ visit._id }}',1)">total shit</a> or <a href="javascript:update_visit('{{ visit._id }}',0)">fuck no</a>.</span></p>
+    <span>Yeah and it was <a href="{{ url_for('.share', vid=visit._id) }}">fucking great</a> / <a href="javascript:update_visit('{{ visit._id }}',1)">total shit</a> or <a href="javascript:update_visit('{{ visit._id }}',0)">fuck no</a>.</span></p>
 </div>
 {% endif %}
 
