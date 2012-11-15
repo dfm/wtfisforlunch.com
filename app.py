@@ -305,8 +305,9 @@ def get_restaurant(loc):
 
         # Compute the probability.
         rnd = np.random.rand()
+        print dist
         if rating is not None and 0 < rating <= 5:
-            a = 0.5 * dist
+            a = 0.5 + 0.5 * dist
             b = 6.0 + dist
             c = 100.0 + 450.0 * dist
             d = (rating - a) ** b
