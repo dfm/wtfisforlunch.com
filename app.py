@@ -139,7 +139,7 @@ def about():
     return flask.render_template("about.html")
 
 
-@app.route("/share/<vid>")
+@app.route("/<vid>")
 def share(vid):
     v = Visit.from_id(vid)
     if v is None:

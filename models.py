@@ -25,6 +25,25 @@ class Visit(object):
     def __getattr__(self, k):
         return self._doc[k]
 
+    @staticmethod
+    def get_counter():
+        c = flask.g.db.counters
+        o = c.find_and_modify({"_id": "visit_id"}, {"$inc": {"count": 1}},
+                              new=True, upsert=True)
+
+        # WTF.
+        chars = [chr(c) for c in range(ord('0'), ord('9') + 1)
+                              + range(ord('a'), ord('z') + 1)
+                              + range(ord('A'), ord('Z') + 1)]
+
+        def counter(i):
+            c = chars[i % len(chars)]
+            if i - len(chars) >= 0:
+                c = counter(i // len(chars)) + c
+            return c
+
+        return counter(o["count"])
+
     @property
     def resto(self):
         if self._resto is None:
@@ -43,8 +62,6 @@ class Visit(object):
 
     @classmethod
     def from_id(cls, _id):
-        if not isinstance(_id, ObjectId):
-            _id = ObjectId(_id)
         u = cls.c().find_one({"_id": _id})
         if u is None:
             return None
@@ -68,8 +85,9 @@ class Visit(object):
     def new(cls, user, resto, dist, prob):
         doc = {"rid": resto._id, "uid": user._id, "date": datetime.now(),
                "distance": dist, "probability": prob,
-               "proposed": False, "followed_up": False}
-        doc["_id"] = cls.c().insert(doc)
+               "proposed": False, "followed_up": False,
+               "_id": cls.get_counter()}
+        cls.c().insert(doc)
         return cls(doc)
 
     def add_rating(self, val):
