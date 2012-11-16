@@ -335,7 +335,7 @@ def get_restaurant(loc):
             v = Visit.c().find_one({"uid": u._id,
                                     "rid": choice["id"]})
 
-        if u is None or v is not None:
+        if u is None or v is None:
             # Compute the distance.
             cloc = choice["geometry"]["location"]
             x1 = lnglat2xyz(cloc["lng"], cloc["lat"])
@@ -364,6 +364,8 @@ def get_restaurant(loc):
                 break
         else:
             prob, choice = 0, None
+
+    print choice
 
     # Despite our best efforts we couldn't find anything... have you been too
     # many places?
