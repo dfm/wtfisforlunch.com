@@ -1,9 +1,35 @@
 {% extends "base.html" %}
 
+{% block hextra %}
+
+<meta property="og:title" content="I fucking loved lunch today!" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="http://4ln.ch/{{ visit._id }}" />
+<meta property="og:image" content="" />
+<meta property="og:site_name" content="WTF is for Lunch?" />
+<meta property="fb:admins" content="100003390405427" />
+
+{% endblock %}
+
 {% block content %}
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {var js, fjs = d.getElementsByTagName(s)[0];if (d.getElementById(id)) return;js = d.createElement(s); js.id = id;js.src = "//connect.facebook.net/en_US/all.js#xfbml=1";fjs.parentNode.insertBefore(js, fjs);}(document, 'script', 'facebook-jssdk'));</script>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
 
 <p>{{ visit.user.fullname }} fucking loved:</p>
 <h1><a href="{{ visit.resto.url }}" target="_blank">{{ visit.resto.name }}</a></h1>
+
+<h3>Share this page:</h3>
+
+
+<div id="social">
+    <div id="sharing">Permalink: <a href="http://4ln.ch/{{ visit._id }}">4ln.ch/{{ visit._id }}</a></div>
+    <div id="buttons">
+        <a href="https://twitter.com/share" class="twitter-share-button" data-url="http://4ln.ch/{{ visit._id }}" data-text="I fucking loved lunch today!" data-hashtags="wtfisforlunch">Tweet</a><br>
+    </div>
+      <div class="fb-like" data-href="http://4ln.ch/{{ visit._id }}" data-send="false" data-layout="button_count" data-width="150" data-show-faces="false" data-font="lucida grande"></div>
+</div>
 
 <div id="footer">
     <p><a href="{{ url_for(".index") }}">WTF is for lunch?</a></p>

@@ -9,7 +9,7 @@
 </div>
 {% endif %}
 
-<p>Hi {{ user.fullname }}.</p>
+<p>{% if user %}Hi {{ user.fullname }}.{% else %}Hey dude.{% endif %}</p>
 
 <p id="loading">Be patient… we're loading your fucking lunch preferences.</p>
 
@@ -38,7 +38,11 @@
     <p id="prefix"></p>
     <h1></h1>
     <p>is on the fucking menu for lunch.</p>
+    {% if user %}
     <p id="havefun">Enjoy. <a href="javascript:send_request();">Get another suggestion.</a></p>
+    {% else %}
+    <p id="havefun">Enjoy. If you <a href="{{ url_for('.login') }}">log the fuck in</a>, then we can email you directions &amp; do magic!</p>
+    {% endif %}
     <div class="options">
         <ul>
             <li><a href="javascript:fuckyeah();">Fuck yeah.</a></li>
@@ -48,7 +52,11 @@
 </div>
 
 <div id="footer">
+    {% if user %}
     <p><a href="{{ url_for(".logout") }}">Get me the fuck outta here.</a></p>
+    {% else %}
+    <p>Why don't you just <a href="{{ url_for(".login") }}">log the fuck in</a>?</p>
+    {% endif %}
 </div>
 
 <div id="google-banner">

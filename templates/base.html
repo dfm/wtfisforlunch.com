@@ -5,9 +5,13 @@
     <meta name="description" content="">
     <meta name="author" content="Dan Foreman-Mackey">
 
+    <meta property="fb:admins" content="100003390405427" />
+
     <link rel="icon" href="{{ url_for('.static', filename='favicon.png') }}" />
     <link rel="stylesheet" href="{{ url_for('.static', filename='normalize.css') }}" />
     <link rel="stylesheet" href="{{ url_for('.static', filename='screen.css') }}" />
+
+    {% block hextra %}{% endblock %}
 
 </head>
 

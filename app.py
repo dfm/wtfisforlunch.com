@@ -127,16 +127,28 @@ login_manager.setup_app(app)
 @app.route("/")
 def index():
     u = login_ext.current_user
-    if u.is_authenticated() and not u.is_anonymous():
+    if u.is_authenticated():
         return flask.render_template("lunch.html", user=u,
                     google_api_key=os.environ.get("GOOGLE_WEB_KEY", ""),
                     visit=u.find_recent())
     return flask.render_template("splash.html")
 
 
+@app.route("/lunch")
+def lunch():
+    return flask.render_template("lunch.html", user=None,
+                google_api_key=os.environ.get("GOOGLE_WEB_KEY", ""),
+                visit=None)
+
+
 @app.route("/about")
 def about():
     return flask.render_template("about.html")
+
+
+@app.route("/magic")
+def magic():
+    return flask.render_template("magic.html")
 
 
 @app.route("/<vid>")
@@ -162,9 +174,8 @@ def share(vid):
 
 @app.route("/api")
 @app.route("/api/<vid>")
-@login_ext.login_required
 def api(vid=None):
-    if vid is not None:
+    if login_ext.current_user.is_authenticated() and vid is not None:
         v = Visit.from_id(vid)
         v.add_rating(0)
 
@@ -181,15 +192,19 @@ def api(vid=None):
         return json.dumps({"code": 3,
                            "message": "We couldn't find fuck all for you."})
 
-    return json.dumps({"vid": str(v._id), "_id": res._id,
+    return json.dumps({"vid": v._id if v is not None else None,
+            "_id": res._id,
             "distance": dist, "rating": rating, "probability": prob,
             "name": u"<a href=\"{0.url}\" target=\"_blank\">{0.name}</a>"
                                                         .format(res)})
 
 
 @app.route("/api/propose/<vid>")
-@login_ext.login_required
 def propose(vid):
+    if not login_ext.current_user.is_authenticated():
+        return json.dumps({"code": 1,
+                           "message": "Why don't you log in?"})
+
     u = login_ext.current_user
     v = Visit.from_id(vid)
     if v is None or u._id != v.uid or v.resto is None:
@@ -250,7 +265,7 @@ The Lunch Robot<br>
 @login_ext.login_required
 def update_visit(vid, val):
     v = Visit.from_id(vid)
-    if v is None:
+    if v is None or v.uid != login_ext.current_user._id:
         return "Failure"
     v.add_rating(val)
     return "Success"
@@ -282,6 +297,10 @@ def propose_position(ll0, sigma):
 
 
 def get_restaurant(loc):
+    u = login_ext.current_user
+    if not u.is_authenticated():
+        u = None
+
     payload = {"key": google_api_key,
                "sensor": "false",
                "types": "restaurant",
@@ -311,38 +330,50 @@ def get_restaurant(loc):
     for i, ind in enumerate(inds):
         choice = data[ind]
 
-        # Compute the distance.
-        cloc = choice["geometry"]["location"]
-        x1 = lnglat2xyz(cloc["lng"], cloc["lat"])
-        x2 = lnglat2xyz(*loc)
-        dist = np.sqrt(2 * (rearth * rearth - np.dot(x1, x2)))
+        # Has the user been there before?
+        if u is not None:
+            v = Visit.c().find_one({"uid": u._id,
+                                    "rid": choice["id"]})
 
-        # And the rating.
-        rating = choice.get("rating", None)
+        if u is None or v is not None:
+            # Compute the distance.
+            cloc = choice["geometry"]["location"]
+            x1 = lnglat2xyz(cloc["lng"], cloc["lat"])
+            x2 = lnglat2xyz(*loc)
+            dist = np.sqrt(2 * (rearth * rearth - np.dot(x1, x2)))
 
-        # Compute the probability.
-        rnd = np.random.rand()
-        print dist
-        if rating is not None and 0 < rating <= 5:
-            a = 0.5 + 0.5 * dist
-            b = 6.0 + dist
-            c = 100.0 + 450.0 * dist
-            d = (rating - a) ** b
-            prob = d / (d + c)
+            # And the rating.
+            rating = choice.get("rating", None)
+
+            # Compute the probability.
+            rnd = np.random.rand()
+            if rating is not None and 0 < rating <= 5:
+                a = 0.5 + 0.5 * dist
+                b = 6.0 + dist
+                c = 100.0 + 450.0 * dist
+                d = (rating - a) ** b
+                prob = d / (d + c)
+            else:
+                prob = np.random.rand() * 0.0
+
+            if prob > thebest[0]:
+                thebest = (prob, choice)
+
+            if rnd <= prob:
+                thebest = (0, None)
+                break
         else:
-            prob = np.random.rand() * 0.0
+            prob, choice = 0, None
 
-        if prob > thebest[0]:
-            thebest = (prob, choice)
+    # Despite our best efforts we couldn't find anything... have you been too
+    # many places?
+    if choice is None:
+        return None
 
-        if rnd <= prob:
-            thebest = (0, None)
-            break
-
+    # HACK: If nothing was _actually_ accepted choose the one with the
+    # highest probability.
     if thebest[1] is not None:
-        prob, restaurant = thebest
-
-    print i, "rejections. Final probability: ", prob
+        prob, choice = thebest
 
     # Is the restaurant cached?
     restaurant = Resto.from_id(choice["id"])
@@ -370,8 +401,10 @@ def get_restaurant(loc):
 
         restaurant = Resto.new(**doc)
 
-    u = login_ext.current_user
-    visit = u.new_suggestion(restaurant, dist, prob)
+    # Build the new visit proposal.
+    visit = None
+    if u is not None:
+        visit = u.new_suggestion(restaurant, dist, prob)
 
     return restaurant, visit, dist, rating, prob
 

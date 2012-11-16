@@ -28,21 +28,26 @@ class Visit(object):
     @staticmethod
     def get_counter():
         c = flask.g.db.counters
-        o = c.find_and_modify({"_id": "visit_id"}, {"$inc": {"count": 1}},
-                              new=True, upsert=True)
 
-        # WTF.
-        chars = [chr(c) for c in range(ord('0'), ord('9') + 1)
-                              + range(ord('a'), ord('z') + 1)
-                              + range(ord('A'), ord('Z') + 1)]
+        tag = None
 
-        def counter(i):
-            c = chars[i % len(chars)]
-            if i - len(chars) >= 0:
-                c = counter(i // len(chars)) + c
-            return c
+        while tag is None or tag in ["about", "me"]:
+            o = c.find_and_modify({"_id": "visit_id"}, {"$inc": {"count": 1}},
+                                  new=True, upsert=True)
 
-        return counter(o["count"])
+            chars = [chr(c) for c in range(ord('0'), ord('9') + 1)
+                                  + range(ord('a'), ord('z') + 1)
+                                  + range(ord('A'), ord('Z') + 1)]
+
+            def counter(i):
+                c = chars[i % len(chars)]
+                if i - len(chars) >= 0:
+                    c = counter(i // len(chars)) + c
+                return c
+
+            tag = counter(o["count"])
+
+        return tag
 
     @property
     def resto(self):
