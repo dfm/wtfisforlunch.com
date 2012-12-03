@@ -24,7 +24,7 @@ def _connect():
     return s
 
 
-def send_msg(email, text, subj, html):
+def send_msg(email, text, subj, html=None):
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subj
     msg["From"] = from_email

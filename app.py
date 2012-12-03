@@ -1,5 +1,5 @@
 import os
-# import re
+import re
 import json
 
 import flask
@@ -20,17 +20,16 @@ from email_utils import send_msg
 app = flask.Flask(__name__)
 app.secret_key = os.environ.get("SECRET", "development secret key")
 
-# yelp_api_url = u"http://api.yelp.com/v2/search"
-# yelp_api_auth = OAuth1(unicode(os.environ["API_CKEY"]),
-#                        unicode(os.environ["API_CSEC"]),
-#                        unicode(os.environ["API_TOKEN"]),
-#                        unicode(os.environ["API_TSEC"]))
-
 google_nearby_url = \
         u"https://maps.googleapis.com/maps/api/place/nearbysearch/json"
 google_detail_url = \
         u"https://maps.googleapis.com/maps/api/place/details/json"
 google_api_key = unicode(os.environ["GOOGLE_API_KEY"])
+
+# Google HTML parser.
+price_re = re.compile(r"<span(?:.*?)>(\$+)</span>")
+type_re = re.compile(r"<span(?:.*?)><span><span>(.*?)"
+                     r"Restaurant(.*?)</span>")
 
 
 # ==========================================================================
@@ -118,6 +117,22 @@ def teardown_request(exception):
 
 # Crazy as it sounds, this MUST be **here**. :-|
 login_manager.setup_app(app)
+
+
+# ==========================================================================
+#                                                                     ERRORS
+# ==========================================================================
+
+@app.errorhandler(500)
+def got_a_500(e):
+    import traceback
+    tb = traceback.format_exc()
+    try:
+        send_msg(u"foreman.mackey@gmail.com", u"Got an error:\n\n" + tb,
+                 u"WTF is the error?")
+    except Exception:
+        pass
+    return "500", 500
 
 
 # ==========================================================================
@@ -345,6 +360,24 @@ def get_restaurant(loc):
             # And the rating.
             rating = choice.get("rating", None)
 
+            # WE NEED THE DETAILS PAGE HERE...
+            # # HACK: parse the HTML to get the price and type.
+            # price, cuisine = None, None
+            # print(choice.keys())
+            # r = requests.get(choice[u"url"])
+            # if r.status_code == requests.codes.ok:
+            #     data = r.text
+            #     tmp = type_re.findall(data)
+            #     if len(tmp) >= 1:
+            #         if tmp[0] != u"":
+            #             cuisine = tmp[0].strip().strip(u",")
+            #         elif tmp[1] != u"":
+            #             cuisine = tmp[1].strip().strip(u",")
+            #     tmp = price_re.findall(data)
+            #     if len(tmp) >= 1:
+            #         price = len(tmp[0][0])
+            #     print(cuisine, price)
+
             # Compute the probability.
             rnd = np.random.rand()
             if rating is not None and 0 < rating <= 5:
@@ -365,8 +398,6 @@ def get_restaurant(loc):
         else:
             prob, choice = 0, None
 
-    print choice
-
     # Despite our best efforts we couldn't find anything... have you been too
     # many places?
     if choice is None:
@@ -380,7 +411,7 @@ def get_restaurant(loc):
     # Is the restaurant cached?
     restaurant = Resto.from_id(choice["id"])
 
-    # If not, fetch the details and grab the price.
+    # If not, fetch the details.
     if restaurant is None:
         pld = {"key": google_api_key, "sensor": "false",
                 "reference": choice["reference"]}
@@ -412,7 +443,5 @@ def get_restaurant(loc):
 
 
 if __name__ == "__main__":
-    # lng, lat = 360 * np.random.rand() - 180, 180 * np.random.rand() - 90
-    # print (lng, lat), xyz2lnglat(lnglat2xyz(lng, lat))
     app.debug = True
     app.run()
