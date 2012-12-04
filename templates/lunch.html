@@ -67,8 +67,8 @@
 
 {% block scripts %}
 
-<script src="https://maps.googleapis.com/maps/api/js?key={{ google_api_key }}&sensor=true"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key={{ google_api_key }}&sensor=false"></script>
 <script src="{{ url_for(".static", filename="zepto.min.js") }}"></script>
-<script src="{{ url_for(".static", filename="locate.js") }}?v4"></script>
+<script src="{{ url_for(".static", filename="locate.js") }}?v5"></script>
 
 {% endblock %}
