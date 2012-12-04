@@ -1,5 +1,9 @@
 {% extends "base.html" %}
 
+{% block hextra %}
+<script src="https://maps.googleapis.com/maps/api/js?key={{ google_api_key }}&sensor=false"></script>
+{% endblock %}
+
 {% block content %}
 
 {% if visit %}
@@ -67,7 +71,6 @@
 
 {% block scripts %}
 
-<script src="https://maps.googleapis.com/maps/api/js?key={{ google_api_key }}&sensor=false"></script>
 <script src="{{ url_for(".static", filename="zepto.min.js") }}"></script>
 <script src="{{ url_for(".static", filename="locate.js") }}?v5"></script>
 
