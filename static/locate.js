@@ -74,7 +74,7 @@ function update_location () {
   geocoder.geocode({address: address}, function(results, code) {
     if (code == google.maps.GeocoderStatus.OK) {
       var geomloc = results[0].geometry.location;
-      loc = {latitude: geomloc.$a, longitude: geomloc.ab};
+      loc = {latitude: geomloc.lat(), longitude: geomloc.lng()};
       $("#locconf span").text(results[0].formatted_address);
       $("#locconf").show();
     } else {
