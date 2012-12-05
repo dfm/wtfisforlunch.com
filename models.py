@@ -87,9 +87,9 @@ class Visit(object):
         return cls(u)
 
     @classmethod
-    def new(cls, user, resto, dist, prob):
+    def new(cls, user, resto, dist, rating, prob):
         doc = {"rid": resto._id, "uid": user._id, "date": datetime.now(),
-               "distance": dist, "probability": prob,
+               "distance": dist, "rating": rating, "probability": prob,
                "proposed": False, "followed_up": False,
                "_id": cls.get_counter()}
         cls.c().insert(doc)
@@ -109,6 +109,9 @@ class Resto(object):
     def __init__(self, kwargs):
         assert kwargs is not None
         self._doc = kwargs
+
+    def get(self, k, v=None):
+        return self._doc.get(k, v)
 
     def __getitem__(self, k):
         return self._doc[k]
@@ -195,8 +198,8 @@ class User(UserMixin):
         kwargs["_id"] = cls.c().insert(kwargs)
         return cls(kwargs)
 
-    def new_suggestion(self, resto, dist, prob):
-        return Visit.new(self, resto, dist, prob)
+    def new_suggestion(self, resto, dist, rating, prob):
+        return Visit.new(self, resto, dist, rating, prob)
 
     def find_recent(self):
         v = list(Visit.c().find({"uid": self._id, "proposed": True,

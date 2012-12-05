@@ -14,6 +14,7 @@ import pymongo
 import numpy as np
 
 from models import Visit, Resto, User
+from model import AcceptanceModel
 from email_utils import send_msg
 
 
@@ -193,6 +194,12 @@ def api(vid=None):
     if login_ext.current_user.is_authenticated() and vid is not None:
         v = Visit.from_id(vid)
         v.add_rating(0)
+        print(v._doc)
+        model = AcceptanceModel(*flask.session.get(u"model", [0.16, 8.0, 3.5]))
+        print(model.pars)
+        model.update(v[u"distance"], v[u"rating"], False, eta=0.05)
+        print(model.pars)
+        flask.session[u"model"] = list(model.pars)
 
     # First, parse the location.
     a = flask.request.args
@@ -323,7 +330,9 @@ def get_restaurant(loc):
 
     for i in range(5):
         # Choose a random position.
-        payload["location"] = "{1},{0}".format(*propose_position(loc, 0.75))
+        payload["location"] = "{1},{0}".format(*propose_position(loc,
+                            np.sqrt(flask.session.get(u"model", [0.4])[0])))
+        print(np.sqrt(flask.session.get(u"model", [0.4])[0]))
 
         # Do the search.
         r = requests.get(google_nearby_url, params=payload)
@@ -339,7 +348,8 @@ def get_restaurant(loc):
         return None
 
     # Accept the proposal depending on the distance and ranking relationship.
-    thebest = (0.0, None)
+    model = AcceptanceModel(*flask.session.get(u"model", [0.16, 8.0, 3.5]))
+    thebest = (0.0, None, None)
     inds = np.arange(len(data))
     np.random.shuffle(inds)
     for i, ind in enumerate(inds):
@@ -358,42 +368,17 @@ def get_restaurant(loc):
             dist = np.sqrt(2 * (rearth * rearth - np.dot(x1, x2)))
 
             # And the rating.
-            rating = choice.get("rating", None)
-
-            # WE NEED THE DETAILS PAGE HERE...
-            # # HACK: parse the HTML to get the price and type.
-            # price, cuisine = None, None
-            # print(choice.keys())
-            # r = requests.get(choice[u"url"])
-            # if r.status_code == requests.codes.ok:
-            #     data = r.text
-            #     tmp = type_re.findall(data)
-            #     if len(tmp) >= 1:
-            #         if tmp[0] != u"":
-            #             cuisine = tmp[0].strip().strip(u",")
-            #         elif tmp[1] != u"":
-            #             cuisine = tmp[1].strip().strip(u",")
-            #     tmp = price_re.findall(data)
-            #     if len(tmp) >= 1:
-            #         price = len(tmp[0][0])
-            #     print(cuisine, price)
+            rating = choice.get("rating", 0.0)
 
             # Compute the probability.
             rnd = np.random.rand()
-            if rating is not None and 0 < rating <= 5:
-                a = 0.5 + 0.5 * dist
-                b = 6.0 + dist
-                c = 100.0 + 450.0 * dist
-                d = (rating - a) ** b
-                prob = d / (d + c)
-            else:
-                prob = np.random.rand() * 0.0
+            prob = model.predict(dist, rating)
 
             if prob > thebest[0]:
-                thebest = (prob, choice)
+                thebest = (prob, choice, dist)
 
             if rnd <= prob:
-                thebest = (0, None)
+                thebest = (0, None, None)
                 break
         else:
             prob, choice = 0, None
@@ -406,7 +391,7 @@ def get_restaurant(loc):
     # HACK: If nothing was _actually_ accepted choose the one with the
     # highest probability.
     if thebest[1] is not None:
-        prob, choice = thebest
+        prob, choice, dist = thebest
 
     # Is the restaurant cached?
     restaurant = Resto.from_id(choice["id"])
@@ -437,7 +422,8 @@ def get_restaurant(loc):
     # Build the new visit proposal.
     visit = None
     if u is not None:
-        visit = u.new_suggestion(restaurant, dist, prob)
+        visit = u.new_suggestion(restaurant, dist,
+                                 restaurant.get(u"rating", 0.0), prob)
 
     return restaurant, visit, dist, rating, prob
 

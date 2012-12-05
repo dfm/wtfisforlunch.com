@@ -12,6 +12,18 @@ class AcceptanceModel(object):
         self._s02 = sigma02
         self._alpha = alpha
 
+    @property
+    def pars(self):
+        return np.array([self._sd2, self._s02, self._alpha])
+
+    def predict(self, dn, rn):
+        return np.exp(-self.loss(dn, rn, True))
+
+    def update(self, dn, rn, an, eta=0.01):
+        v = self.pars
+        v -= eta * self.grad(dn, rn, an)
+        self.set_pars(v)
+
     def loss(self, dn, rn, an):
         dn2, rn2 = dn * dn, (rn - 5) * (rn - 5)
         sr2 = self._s02 * (dn + 1) ** -self._alpha
