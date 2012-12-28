@@ -1,6 +1,6 @@
 from __future__ import print_function, absolute_import, unicode_literals
 
-__all__ = ["check_login", "create_login", "login_handler"]
+__all__ = ["check_login", "create_login", "login_handler", "logout_handler"]
 
 import os
 import flask
@@ -37,6 +37,11 @@ def login_handler():
 
     return oid.try_login(COMMON_PROVIDERS["google"],
                          ask_for=["email", "fullname"])
+
+
+def logout_handler():
+    login_ext.logout_user()
+    return flask.redirect(flask.url_for("yelp.index"))
 
 
 @oid.after_login
