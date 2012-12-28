@@ -1,3 +1,5 @@
+from __future__ import print_function, absolute_import, unicode_literals
+
 import os
 import re
 import json
@@ -7,7 +9,7 @@ from flask.ext.openid import OpenID, COMMON_PROVIDERS
 import flask.ext.login as login_ext
 
 import requests
-# from requests.auth import OAuth1
+from requests.auth import OAuth1
 
 import pymongo
 
@@ -20,6 +22,12 @@ from email_utils import send_msg
 
 app = flask.Flask(__name__)
 app.secret_key = os.environ.get("SECRET", "development secret key")
+
+yelp_api_url = "http://api.yelp.com/v2/search"
+yelp_api_auth = OAuth1(unicode(os.environ["API_CKEY"]),
+                       unicode(os.environ["API_CSEC"]),
+                       unicode(os.environ["API_TOKEN"]),
+                       unicode(os.environ["API_TSEC"]))
 
 google_nearby_url = \
         u"https://maps.googleapis.com/maps/api/place/nearbysearch/json"
@@ -276,7 +284,7 @@ The Lunch Robot<br>
         send_msg("{0.fullname} <{0.email}>".format(u), text,
                  "Lunch at {0}".format(r.name), html=html)
     except Exception as e:
-        print "EMAIL ERROR: ", e
+        print("EMAIL ERROR: {0}".format(e))
         return json.dumps({"code": 2,
                         "message": "I couldn't send you a fucking reminder."})
 
