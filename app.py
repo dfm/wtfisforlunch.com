@@ -15,13 +15,16 @@ import pymongo
 
 import numpy as np
 
-from models import Visit, Resto, User
-from model import AcceptanceModel
-from email_utils import send_msg
+from wtf import yelp
+from wtf.models import Visit, Resto, User
+from wtf.model import AcceptanceModel
+from wtf.email_utils import send_msg
 
 
 app = flask.Flask(__name__)
-app.secret_key = os.environ.get("SECRET", "development secret key")
+app.secret_key = unicode(os.environ.get("SECRET", "development secret key")) \
+                    .encode("utf-8")
+app.register_blueprint(yelp.bp)
 
 yelp_api_url = "http://api.yelp.com/v2/search"
 yelp_api_auth = OAuth1(unicode(os.environ["API_CKEY"]),
