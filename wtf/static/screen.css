@@ -1,0 +1,109 @@
+/*                   *
+ *   BASIC STYLES    *
+ *                   */
+
+body {
+    margin: 0;
+    padding: 0;
+    padding-bottom: 75px;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 12pt;
+    font-weight: 400;
+    color: #222;
+}
+
+a {
+    text-decoration: none;
+    color: steelblue;
+}
+
+a:hover {
+    color: #0E5C9E;
+}
+
+
+/*                   *
+ *   SCAFFOLDING     *
+ *                   */
+
+#header {
+    position: fixed;
+    top: 0;
+    width: 100%;
+}
+
+#error {
+    padding: 8px;
+    background: #9d261d;
+    border-bottom: 1px solid #600;
+    color: #eee;
+    text-align: center;
+    display: none;
+}
+
+#header-message {
+    padding: 12px;
+    background: #eee;
+    border-bottom: 1px solid #aaa;
+    font-size: 0.9em;
+    text-align: center;
+    display: none;
+}
+
+#supertitle, #title, #subtitle, #options, #location {
+    font-weight: 600;
+    line-height: 2;
+    text-align: center;
+}
+
+#supertitle, #subtitle, #options, #location {
+    font-size: 26pt;
+}
+
+#supertitle {
+    margin-top: 120px;
+}
+
+#title {
+    font-size: 72pt;
+}
+
+#location-icon {
+    display: none;
+}
+
+#locconf {
+    display: none;
+}
+
+#subtitle, #options {
+    display: none;
+}
+
+#footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    padding: 12px;
+    background: #eee;
+    border-top: 1px solid #aaa;
+    font-size: 0.9em;
+    text-align: center;
+}
+
+
+/*                   *
+ *   LOCATION FORM   *
+ *                   */
+
+form {
+    display: inline;
+}
+
+input[type="text"] {
+    outline: none;
+    border: 0;
+    border-bottom: 1px solid #222;
+    padding: 3px 5px;
+    margin: 0 10px;
+}
