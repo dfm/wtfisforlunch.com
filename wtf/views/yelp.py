@@ -7,6 +7,9 @@ import numpy as np
 import requests
 from requests_oauthlib import OAuth1
 
+from wtf.geo import propose_position
+from wtf.email_utils import send_msg
+
 
 yelp = flask.Blueprint("yelp", __name__)
 
@@ -38,23 +41,50 @@ def main():
 
     # Build the Yelp search.
     categories = get_categories()
-    inds = np.random.randint(len(categories), size=10)
-    cat_filter = ",".join([categories[i] for i in inds])
-    print(cat_filter)
     payload = {
-            "category_filter": cat_filter,
             "sort_mode": 2,
-            "ll": ",".join([str(l) for l in loc[::-1]])
         }
 
-    # Submit the search on Yelp.
-    r = requests.get(api_url, params=payload, auth=auth)
-    if r.status_code != requests.codes.ok:
-        print(r.json())
-        return json.dumps({"message":
-                    "The fucking request to Yelp's servers failed."}), 404
-    data = r.json()
+    ntries = 3
+    ncategories = 10
+    for i in range(ntries):
+        if i < ntries - 1:
+            # Randomly select some categories.
+            inds = np.random.randint(len(categories), size=ncategories)
+            cat_filter = ",".join([categories[ind] for ind in inds])
+            payload["category_filter"] = cat_filter
+        else:
+            # We've tried too many times. Just search all restaurants.
+            payload["category_filter"] = "restaurants"
 
-    # Choose a restaurant.
+        # Propose a new position.
+        new_pos = propose_position(loc, np.sqrt(0.4))
+        payload["ll"] = "{1},{0}".format(*new_pos)
+
+        # Submit the search on Yelp.
+        r = requests.get(api_url, params=payload, auth=auth)
+        if r.status_code != requests.codes.ok:
+            try:
+                send_msg(",".join(flask.current_app.config["ADMIN_EMAILS"]),
+                         flask.request.url + "\n\n"
+                            + json.dumps(r.json(), indent=2),
+                         "Yelp API request failed.")
+            except:
+                pass
+
+            return json.dumps({"message":
+                    "We couldn't find any results. "
+                    "Maybe you should just stay home."}), 404
+
+        data = r.json()["businesses"]
+
+        if len(data) > 0:
+            break
+
+    if len(data) == 0:
+        # We really couldn't find any results at all.
+        return (json.dumps({"message":
+            "We couldn't find any results. Maybe you should just stay home."}),
+            404)
 
     return json.dumps(data)
