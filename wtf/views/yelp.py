@@ -145,9 +145,9 @@ def main(rejectid=None):
     resp = r.json()
     map_url = "http://maps.googleapis.com/maps/api/staticmap" \
                 "?zoom=15&size=400x200&scale=2&sensor=false" \
-                "&key=" + flask.current_app.config["GOOGLE_WEB_KEY"] \
                 + "&markers={latitude},{longitude}" \
                     .format(**choice["location"]["coordinate"])
+                # "&key=" + flask.current_app.config["GOOGLE_WEB_KEY"] \
     if r.status_code == requests.codes.ok and resp["status"] == "OK":
         # Loop over the route and build up the path to be displayed on the
         # map.
