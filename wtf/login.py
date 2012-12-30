@@ -41,7 +41,7 @@ def login_handler():
 
 def logout_handler():
     login_ext.logout_user()
-    return flask.redirect(flask.url_for("yelp.index"))
+    return flask.redirect(flask.url_for(".index"))
 
 
 @oid.after_login

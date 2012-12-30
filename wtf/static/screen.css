@@ -50,6 +50,16 @@ a:hover {
     display: none;
 }
 
+#status-message {
+    padding: 30px 10px;
+    background: #eee;
+    border-bottom: 1px solid #aaa;
+    text-align: center;
+    font-weight: 600;
+    font-size: 22pt;
+    display: none;
+}
+
 #supertitle, #title, #info, #subtitle, #options, #location {
     font-weight: 600;
     padding: 0.5em 0;
@@ -104,6 +114,12 @@ a:hover {
     height: 200px;
     border: 1px solid #222;
     clear: both;
+}
+
+#info-categories {
+    margin-top: 15px;
+    font-weight: 300;
+    font-style: italic;
 }
 
 #location-icon {

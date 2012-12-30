@@ -102,6 +102,10 @@
 
     $("#title-wrapper").off();
 
+    // Show the loading message.
+    $("#status-message").text("Hang on. I'm loading your fucking lunch preferences…")
+                        .show();
+
     // Send the request.
     $.ajax({url: "/api/",
             data: wtf.coordinates,
@@ -113,6 +117,8 @@
   // API call responses.
   wtf.suggestion = {
     success: function (data, code, xhr) {
+      $("#status-message").hide();
+
       // Show the name of the restaurant.
       $("#supertitle").text("It looks like").show();
       $("#title").html("<a href=\"" + data.url + "\" target=\"_blank\">"
@@ -139,8 +145,12 @@
 
       // Show the map image.
       $("#map-img").attr("src", data.map_url);
+
+      // List the categories.
+      $("#info-categories").text(data.categories);
     },
     error: function (msg) {
+      $("#status-message").hide();
       $("#supertitle").text("Hmm… Something went wrong.").show();
       $("#title").text("Maybe you should just fucking stay home.").show();
       $("#subtitle")

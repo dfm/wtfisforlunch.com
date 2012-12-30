@@ -18,10 +18,12 @@
     <div id="header-message">
         Did you ever end up going...
     </div>
+
+    <div id="status-message"></div>
 </div>
 
 <div id="supertitle">
-    Hi Dan Foreman-Mackey.
+    {% if user %}Hi {{ user.fullname }}.{% else %}Hello stranger.{% endif %}
 </div>
 
 <div id="title-wrapper">
@@ -31,6 +33,7 @@
     <div id="info">
         <div id="info-inner"></div>
         <img id="map-img" src="">
+        <div id="info-categories"></div>
     </div>
 </div>
 
@@ -47,7 +50,6 @@
 </div>
 
 <div id="subtitle">
-    Subtitle.
 </div>
 
 <div id="options">
@@ -59,7 +61,8 @@
 </div>
 
 <div id="footer">
-    <a href="{{ url_for("logout") }}">Log the fuck out.</a>
+    {% if user %}<a href="{{ url_for("logout") }}">Log the fuck out.</a>
+    {% else %}<a href="{{ url_for("login") }}">Log the fuck in.</a>{% endif %}
 </div>
 
 {% endblock %}

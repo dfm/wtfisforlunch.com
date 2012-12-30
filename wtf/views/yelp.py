@@ -129,6 +129,7 @@ def main():
 
     return json.dumps({
             "name": choice["name"],
+            "categories": ", ".join([c[0] for c in choice["categories"]]),
             "url": choice["url"],
             "rating": choice.get("rating", 0.0),
             "rating_image": choice["rating_img_url"],
@@ -137,7 +138,7 @@ def main():
             "probability": best[0],
             "map_url": "http://maps.googleapis.com/maps/api/staticmap"
                        "?zoom=15&size=400x200&scale=2&sensor=false"
-                       # "&key=" + flask.current_app.config["GOOGLE_WEB_KEY"]
+                       "&key=" + flask.current_app.config["GOOGLE_WEB_KEY"]
                        + "&markers={latitude},{longitude}"
                             .format(**choice["location"]["coordinate"])
         })

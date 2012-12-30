@@ -3,17 +3,49 @@ from __future__ import print_function, absolute_import, unicode_literals
 __all__ = ["create_app"]
 
 import flask
+import flask.ext.login as login_ext
 
+import os
 import logging
 
-from .views.yelp import yelp
-from .login import create_login, login_handler, logout_handler
-from .error_handlers import TLSSMTPHandler
+import pymongo
+
+from wtf.views.yelp import yelp
+from wtf.login import create_login, login_handler, logout_handler
+from wtf.error_handlers import TLSSMTPHandler
+from wtf.models import User, Visit
 
 
 def index_view():
+    user = login_ext.current_user
+    if not user.is_authenticated():
+        user = None
     return flask.render_template("index.html",
-                    google_api_key=flask.current_app.config["GOOGLE_WEB_KEY"])
+                    google_api_key=flask.current_app.config["GOOGLE_WEB_KEY"],
+                    user=user)
+
+
+def before_request():
+    uri = os.environ.get("MONGOLAB_URI", "mongodb://localhost/wtflunch")
+    flask.g.dbc = pymongo.Connection(host=uri)
+    dbname = pymongo.uri_parser.parse_uri(uri).get("database", "wtflunch")
+    flask.g.db = flask.g.dbc[dbname]
+
+    # Indexing.
+    c = User.c()
+    c.ensure_index("token")
+    c.ensure_index("open_id")
+
+    c = Visit.c()
+    c.ensure_index("uid")
+    c.ensure_index("rid")
+    c.ensure_index("date")
+    c.ensure_index("followed_up")
+    c.ensure_index("proposed")
+
+
+def teardown_request(exception):
+    flask.g.dbc.close()
 
 
 def create_app():
@@ -27,6 +59,10 @@ def create_app():
     app.add_url_rule("/", "index", index_view)
     app.add_url_rule("/login", "login", login_handler)
     app.add_url_rule("/logout", "logout", logout_handler)
+
+    # Pre- and post-request hooks.
+    app.before_request(before_request)
+    app.teardown_request(teardown_request)
 
     # Set up logins.
     oid, login_manager = create_login()
