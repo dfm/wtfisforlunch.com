@@ -139,11 +139,13 @@ def main(rejectid=None):
             "mode": "walking",
             "sensor": "false",
             "origin": "{1},{0}".format(*loc),
-            "destination": ", ".join(l["address"])
-                           + ", " + l["city"]
-                           + ", " + l["state_code"]
-                           + ", " + l["country_code"]
-                           + ", " + l["postal_code"]
+            "destination": "{latitude},{longitude}".format(
+                            **(l["coordinate"]))
+            # "destination": "\n".join(l["address"])
+            #                + "\n" + l["city"]
+            #                + "\n" + l["state_code"]
+            #                + "\n" + l["country_code"]
+            #                + "\n" + l["postal_code"]
             }
     r = requests.get(google_directions_url, params=params)
     resp = r.json()
