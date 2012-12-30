@@ -134,12 +134,16 @@ def main(rejectid=None):
     choice = data[best[1]]
 
     # Try and get the directions.
+    l = choice["location"]
     params = {
             "mode": "walking",
             "sensor": "false",
             "origin": "{1},{0}".format(*loc),
-            "destination": "{latitude},{longitude}".format(
-                                **(choice["location"]["coordinate"]))
+            "destination": ", ".join(l["address"])
+                           + ", " + l["city"]
+                           + ", " + l["state_code"]
+                           + ", " + l["country_code"]
+                           + ", " + l["postal_code"]
             }
     r = requests.get(google_directions_url, params=params)
     resp = r.json()
@@ -149,22 +153,10 @@ def main(rejectid=None):
                     .format(**choice["location"]["coordinate"])
                 # "&key=" + flask.current_app.config["GOOGLE_WEB_KEY"] \
     if r.status_code == requests.codes.ok and resp["status"] == "OK":
-        # Loop over the route and build up the path to be displayed on the
-        # map.
-        route = resp["routes"][0]["legs"]
-        path = ["{1},{0}".format(*loc)]
-        for leg in route:
-            path += ["{lat},{lng}".format(**(leg["start_location"]))]
-            for step in leg["steps"]:
-                path += ["{lat},{lng}".format(**(step["start_location"])),
-                         "{lat},{lng}".format(**(step["end_location"]))]
-            path += ["{lat},{lng}".format(**(leg["end_location"]))]
-        path += ["{latitude},{longitude}"
-                    .format(**choice["location"]["coordinate"])]
-
-        # Build the map URL.
+        # Add the route to the map.
+        route = resp["routes"][0]["overview_polyline"]["points"]
         map_url += "&markers=color:green|{1},{0}".format(*loc) \
-                 + "&path=color:0x0000ff|weight:5|" + "|".join(path)
+                 + "&path=color:0x0000ff|weight:5|enc:" + route
 
     return json.dumps({
             "id": choice["id"],
