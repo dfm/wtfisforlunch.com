@@ -7,8 +7,9 @@ import numpy as np
 import requests
 from requests_oauthlib import OAuth1
 
-from wtf.geo import propose_position
+from wtf.geo import propose_position, lnglat2xyz, rearth
 from wtf.email_utils import send_msg
+from wtf.acceptance_model import AcceptanceModel
 
 
 yelp = flask.Blueprint("yelp", __name__)
@@ -46,7 +47,7 @@ def main():
         }
 
     ntries = 3
-    ncategories = 10
+    ncategories = 5
     for i in range(ntries):
         if i < ntries - 1:
             # Randomly select some categories.
@@ -58,7 +59,7 @@ def main():
             payload["category_filter"] = "restaurants"
 
         # Propose a new position.
-        new_pos = propose_position(loc, np.sqrt(0.4))
+        new_pos = propose_position(loc, np.sqrt(0.16))
         payload["ll"] = "{1},{0}".format(*new_pos)
 
         # Submit the search on Yelp.
@@ -87,4 +88,56 @@ def main():
             "We couldn't find any results. Maybe you should just stay home."}),
             404)
 
-    return json.dumps(data)
+    # Choose one of the restaurants.
+    model = AcceptanceModel(0.16, 8.0, 3.5)
+
+    # Loop over the list of suggestions and accept or reject stochastically.
+    inds = np.arange(len(data))
+    np.random.shuffle(inds)
+    best = (0, None, None)
+    for ind in inds:
+        choice = data[ind]
+
+        # Get the aggregate user rating.
+        n0, r0 = 5, choice.get("rating", 0.0)
+        nratings = choice.get("review_count", 0)
+        rating = nratings * r0 / (n0 + nratings)
+
+        # Compute the distance.
+        cloc = choice["location"]["coordinate"]
+        x1 = lnglat2xyz(cloc["longitude"], cloc["latitude"])
+        x2 = lnglat2xyz(*loc)
+        dist = np.sqrt(2 * (rearth * rearth - np.dot(x1, x2)))
+
+        # Compute the predictive acceptance probability.
+        prob = model.predict(dist, rating)
+        if prob > best[0]:
+            best = (prob, ind, dist)
+
+        # Accept stochastically.
+        if np.random.rand() <= prob:
+            best = (prob, ind, dist)
+            break
+
+    if best[1] is None:
+        # None of the restaurants had non-zero acceptance probability.
+        return (json.dumps({"message":
+            "We couldn't find any results. Maybe you should just stay home."}),
+            404)
+
+    choice = data[best[1]]
+
+    return json.dumps({
+            "name": choice["name"],
+            "url": choice["url"],
+            "rating": choice.get("rating", 0.0),
+            "rating_image": choice["rating_img_url"],
+            "review_count": choice["review_count"],
+            "distance": best[2],
+            "probability": best[0],
+            "map_url": "http://maps.googleapis.com/maps/api/staticmap"
+                       "?zoom=15&size=400x200&scale=2&sensor=false"
+                       "&key=" + flask.current_app.config["GOOGLE_WEB_KEY"]
+                       + "&markers={latitude},{longitude}"
+                            .format(**choice["location"]["coordinate"])
+        })

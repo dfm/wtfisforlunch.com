@@ -5,7 +5,7 @@
 body {
     margin: 0;
     padding: 0;
-    padding-bottom: 75px;
+    padding-bottom: 250px;
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 12pt;
     font-weight: 400;
@@ -50,10 +50,11 @@ a:hover {
     display: none;
 }
 
-#supertitle, #title, #subtitle, #options, #location {
+#supertitle, #title, #info, #subtitle, #options, #location {
     font-weight: 600;
-    line-height: 2;
-    text-align: center;
+    padding: 0.5em 0;
+    margin: 0 50px;
+    line-height: 1;
 }
 
 #supertitle, #subtitle, #options, #location {
@@ -61,11 +62,48 @@ a:hover {
 }
 
 #supertitle {
-    margin-top: 120px;
+    margin-top: 175px;
 }
 
 #title {
     font-size: 72pt;
+}
+
+#title-wrapper {
+}
+
+#info {
+    display: none;
+    position: absolute;
+    padding: 15px 20px;
+    background: #ddd;
+    border: 1px solid #222;
+    -webkit-border-radius: 5px;
+       -moz-border-radius: 5px;
+            border-radius: 5px;
+}
+
+#info-inner {
+    height: 30px;
+    padding: 0;
+}
+
+#info-inner span, #info-inner img {
+    display: block;
+    float: left;
+}
+
+#info-inner img {
+    margin-top: 1px;
+    padding-left: 10px;
+}
+
+#map-img {
+    display: block;
+    width: 400px;
+    height: 200px;
+    border: 1px solid #222;
+    clear: both;
 }
 
 #location-icon {

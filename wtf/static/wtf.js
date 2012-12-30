@@ -108,7 +108,30 @@
   // API call responses.
   wtf.suggestion = {
     success: function (data, code, xhr) {
-      console.log(data);
+      // Show the name of the restaurant.
+      $("#supertitle").text("It looks like").show();
+      $("#title").html("<a href=\"" + data.url + "\" target=\"_blank\">"
+                       + data.name + "</a>").show();
+      $("#title-wrapper")
+          .on("mouseover", function () {
+            // Position the popup.
+            var title_coords = $("#title").offset();
+            $("#info").css({top: title_coords.top + title_coords.height - 30})
+                      .show();
+          })
+          .on("mouseout", function () {$("#info").hide();});
+      $("#subtitle").text("Is on the fucking menu for lunch.").show();
+
+      // Show the aggregated ratings from Yelp.
+      var reviews = "reviews";
+      if (data.review_count == 1) reviews = "review";
+      $("#info-inner").html("<span>" + data.review_count + " " + reviews
+                            + " on Yelp: </span>"
+                            + "<img src=\"" + data.rating_image + "\">");
+
+      // Show the map image.
+      $("#map-img").attr("src", data.map_url);
+
     },
     error: function (msg) {
       console.log(msg);

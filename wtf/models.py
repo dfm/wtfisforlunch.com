@@ -31,7 +31,8 @@ class Visit(object):
 
         tag = None
 
-        while tag is None or tag in ["about", "me", "magic", "yelp", "google"]:
+        while tag is None or tag in ["about", "me", "magic", "yelp", "google",
+                                     "lunch"]:
             o = c.find_and_modify({"_id": "visit_id"}, {"$inc": {"count": 1}},
                                   new=True, upsert=True)
 
