@@ -24,7 +24,11 @@ def get_categories():
 
 
 @yelp.route("/")
-def main():
+@yelp.route("/reject/<rejectid>")
+def main(rejectid=None):
+    if rejectid is not None:
+        pass
+
     # Parse the location coordinates.
     a = flask.request.args
     if "longitude" in a and "latitude" in a:
@@ -128,8 +132,11 @@ def main():
     choice = data[best[1]]
 
     return json.dumps({
+            "id": choice["id"],
             "name": choice["name"],
             "categories": ", ".join([c[0] for c in choice["categories"]]),
+            "reject_url": flask.url_for(".main", rejectid=choice["id"]),
+            "accept_url": flask.url_for(".accept", acceptid=choice["id"]),
             "url": choice["url"],
             "rating": choice.get("rating", 0.0),
             "rating_image": choice["rating_img_url"],
@@ -142,3 +149,8 @@ def main():
                        + "&markers={latitude},{longitude}"
                             .format(**choice["location"]["coordinate"])
         })
+
+
+@yelp.route("/accept/<acceptid>")
+def accept(acceptid):
+    return "Success."

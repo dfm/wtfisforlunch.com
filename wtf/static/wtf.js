@@ -2,7 +2,10 @@
 
   "use strict";
 
-  var wtf = root.WTF = {coordinates: null};
+  var wtf = root.WTF = {
+    coordinates: null,
+    api_url: "/api/"
+  };
 
   // General interface interaction.
   wtf.display_error = function (message) {
@@ -107,7 +110,7 @@
                         .show();
 
     // Send the request.
-    $.ajax({url: "/api/",
+    $.ajax({url: wtf.api_url,
             data: wtf.coordinates,
             dataType: "json",
             success: wtf.suggestion.success,
@@ -117,6 +120,11 @@
   // API call responses.
   wtf.suggestion = {
     success: function (data, code, xhr) {
+      // Update the API url.
+      wtf.api_url = data.reject_url;
+      wtf.accept_url = data.accept_url;
+
+      // Hide the patience message.
       $("#status-message").hide();
 
       // Show the name of the restaurant.
@@ -157,6 +165,19 @@
         .html("<a href=\"javascript:WTF.get_suggestion();\">Try again.</a>")
         .show();
     }
+  };
+
+  // Accept the suggestion.
+  wtf.accept = function () {
+    console.log();
+    wtf.api_url = "/api/";
+    $("#subtitle").html("Fucking enjoy it! "
+                        + "<a href=\"javascript:WTF.get_suggestion();\">"
+                        + "Get another suggestion.</a>");
+    $("#options").hide();
+
+    // Send the acceptance message.
+    $.ajax({url: wtf.accept_url});
   };
 
   $(function () {
