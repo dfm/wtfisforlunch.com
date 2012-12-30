@@ -16,6 +16,8 @@ yelp = flask.Blueprint("yelp", __name__)
 
 api_url = "http://api.yelp.com/v2/search"
 
+google_directions_url = "http://maps.googleapis.com/maps/api/directions/json"
+
 
 def get_categories():
     cats = json.load(flask.current_app
@@ -131,6 +133,39 @@ def main(rejectid=None):
 
     choice = data[best[1]]
 
+    # Try and get the directions.
+    params = {
+            "mode": "walking",
+            "sensor": "false",
+            "origin": "{1},{0}".format(*loc),
+            "destination": "{latitude},{longitude}".format(
+                                **(choice["location"]["coordinate"]))
+            }
+    r = requests.get(google_directions_url, params=params)
+    resp = r.json()
+    map_url = "http://maps.googleapis.com/maps/api/staticmap" \
+                "?zoom=15&size=400x200&scale=2&sensor=false" \
+                "&key=" + flask.current_app.config["GOOGLE_WEB_KEY"] \
+                + "&markers={latitude},{longitude}" \
+                    .format(**choice["location"]["coordinate"])
+    if r.status_code == requests.codes.ok and resp["status"] == "OK":
+        # Loop over the route and build up the path to be displayed on the
+        # map.
+        route = resp["routes"][0]["legs"]
+        path = ["{1},{0}".format(*loc)]
+        for leg in route:
+            path += ["{lat},{lng}".format(**(leg["start_location"]))]
+            for step in leg["steps"]:
+                path += ["{lat},{lng}".format(**(step["start_location"])),
+                         "{lat},{lng}".format(**(step["end_location"]))]
+            path += ["{lat},{lng}".format(**(leg["end_location"]))]
+        path += ["{latitude},{longitude}"
+                    .format(**choice["location"]["coordinate"])]
+
+        # Build the map URL.
+        map_url += "&markers=color:green|{1},{0}".format(*loc) \
+                 + "&path=color:0x0000ff|weight:5|" + "|".join(path)
+
     return json.dumps({
             "id": choice["id"],
             "name": choice["name"],
@@ -143,11 +178,7 @@ def main(rejectid=None):
             "review_count": choice["review_count"],
             "distance": best[2],
             "probability": best[0],
-            "map_url": "http://maps.googleapis.com/maps/api/staticmap"
-                       "?zoom=15&size=400x200&scale=2&sensor=false"
-                       # "&key=" + flask.current_app.config["GOOGLE_WEB_KEY"]
-                       + "&markers={latitude},{longitude}"
-                            .format(**choice["location"]["coordinate"])
+            "map_url": map_url
         })
 
 

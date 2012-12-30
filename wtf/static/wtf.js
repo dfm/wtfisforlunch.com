@@ -129,8 +129,20 @@
 
       // Show the name of the restaurant.
       $("#supertitle").text("It looks like").show();
-      $("#title").html("<a href=\"" + data.url + "\" target=\"_blank\">"
-                       + data.name + "</a>").show();
+
+      // This is a hack so that after you click on a link if you don't come
+      // back in 10 minutes, it'll automatically accept the restaurant for
+      // you.
+      $("#title").empty().show().append($("<a>").attr("href", data.url)
+                                        .attr("target", "_blank")
+                                        .text(data.name)
+                                        .on("click", function () {
+                                          wtf.timer = setTimeout(function () {
+                                            console.log("Auto-accept?");
+                                          }, 10 * 60 * 1000);
+                                        }));
+
+      // Include a mouseover map.
       $("#title-wrapper")
           .on("mouseover", function () {
             // Position the popup.
@@ -169,7 +181,6 @@
 
   // Accept the suggestion.
   wtf.accept = function () {
-    console.log();
     wtf.api_url = "/api/";
     $("#subtitle").html("Fucking enjoy it! "
                         + "<a href=\"javascript:WTF.get_suggestion();\">"
@@ -183,6 +194,14 @@
   $(function () {
     // Check for geolocation.
     if (Modernizr.geolocation) $("#location-icon").show();
+
+    // Clear the timeout when the focus comes back to the window.
+    $(window).on("focus", function () {
+      if (typeof wtf.timer !== "undefined" && wtf.timer != null) {
+        clearTimeout(wtf.timer);
+        wtf.timer = null;
+      }
+    });
   });
 
 })(this);
