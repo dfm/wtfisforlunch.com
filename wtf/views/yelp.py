@@ -137,7 +137,7 @@ def main():
             "probability": best[0],
             "map_url": "http://maps.googleapis.com/maps/api/staticmap"
                        "?zoom=15&size=400x200&scale=2&sensor=false"
-                       "&key=" + flask.current_app.config["GOOGLE_WEB_KEY"]
+                       # "&key=" + flask.current_app.config["GOOGLE_WEB_KEY"]
                        + "&markers={latitude},{longitude}"
                             .format(**choice["location"]["coordinate"])
         })

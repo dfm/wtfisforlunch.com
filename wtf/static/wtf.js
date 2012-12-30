@@ -95,7 +95,12 @@
 
     // Sync the interface.
     $("#location").hide();
+    $("#supertitle").hide();
     $("#title").hide();
+    $("#subtitle").hide();
+    $("#options").hide();
+
+    $("#title-wrapper").off();
 
     // Send the request.
     $.ajax({url: "/api/",
@@ -116,11 +121,14 @@
           .on("mouseover", function () {
             // Position the popup.
             var title_coords = $("#title").offset();
-            $("#info").css({top: title_coords.top + title_coords.height - 30})
+            $("#info").css({top: title_coords.top + title_coords.height - 35})
                       .show();
           })
           .on("mouseout", function () {$("#info").hide();});
       $("#subtitle").text("Is on the fucking menu for lunch.").show();
+
+      // Show the options.
+      $("#options").show();
 
       // Show the aggregated ratings from Yelp.
       var reviews = "reviews";
@@ -131,12 +139,10 @@
 
       // Show the map image.
       $("#map-img").attr("src", data.map_url);
-
     },
     error: function (msg) {
-      console.log(msg);
-      wtf.display_error(eval("[" + msg.response + "]")[0].message);
-      $("#title").text("You broke the internet!").show();
+      $("#supertitle").text("Hmm… Something went wrong.").show();
+      $("#title").text("Maybe you should just fucking stay home.").show();
       $("#subtitle")
         .html("<a href=\"javascript:WTF.get_suggestion();\">Try again.</a>")
         .show();

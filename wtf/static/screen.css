@@ -5,7 +5,7 @@
 body {
     margin: 0;
     padding: 0;
-    padding-bottom: 250px;
+    padding-bottom: 150px;
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 12pt;
     font-weight: 400;
@@ -62,7 +62,7 @@ a:hover {
 }
 
 #supertitle {
-    margin-top: 175px;
+    margin-top: 125px;
 }
 
 #title {
@@ -116,6 +116,21 @@ a:hover {
 
 #subtitle, #options {
     display: none;
+}
+
+#options {
+    line-height: 1.2;
+}
+
+#options ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+#options ul li {
+    margin: 0;
+    padding: 0;
 }
 
 #footer {
