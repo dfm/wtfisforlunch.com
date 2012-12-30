@@ -129,7 +129,7 @@
       $("#status-message").hide();
 
       // Show the name of the restaurant.
-      $("#supertitle").text("It looks like").show();
+      $("#supertitle").text("It looks like lunch is going to be at").show();
 
       // This is a hack so that after you click on a link if you don't come
       // back in 10 minutes, it'll automatically accept the restaurant for
@@ -145,7 +145,7 @@
 
       // Show the map, ratings, etc.
       $("#info").show();
-      $("#subtitle").text("Is on the fucking menu for lunch.").show();
+      // $("#subtitle").text("Is on the fucking menu for lunch.").show();
 
       // Show the options.
       $("#options").show();
