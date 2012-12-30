@@ -5,7 +5,7 @@
 body {
     margin: 0;
     padding: 0;
-    padding-bottom: 150px;
+    padding-bottom: 100px;
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 12pt;
     font-weight: 400;
@@ -60,7 +60,7 @@ a:hover {
     display: none;
 }
 
-#supertitle, #title, #info, #subtitle, #options, #location {
+#supertitle, #title, #subtitle, #options, #location {
     font-weight: 600;
     padding: 0.5em 0;
     margin: 0 50px;
@@ -72,7 +72,7 @@ a:hover {
 }
 
 #supertitle {
-    margin-top: 125px;
+    margin-top: 100px;
 }
 
 #title {
@@ -84,13 +84,10 @@ a:hover {
 
 #info {
     display: none;
-    position: absolute;
-    padding: 15px 20px;
+    margin: 35px 0;
+    padding: 25px 50px;
     background: #ddd;
-    border: 1px solid #222;
-    -webkit-border-radius: 5px;
-       -moz-border-radius: 5px;
-            border-radius: 5px;
+    font-weight: 600;
 }
 
 #info-inner {

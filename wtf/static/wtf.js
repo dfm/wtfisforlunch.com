@@ -101,6 +101,7 @@
     $("#supertitle").hide();
     $("#title").hide();
     $("#subtitle").hide();
+    $("#info").hide();
     $("#options").hide();
 
     $("#title-wrapper").off();
@@ -142,15 +143,8 @@
                                           }, 10 * 60 * 1000);
                                         }));
 
-      // Include a mouseover map.
-      $("#title-wrapper")
-          .on("mouseover", function () {
-            // Position the popup.
-            var title_coords = $("#title").offset();
-            $("#info").css({top: title_coords.top + title_coords.height - 35})
-                      .show();
-          })
-          .on("mouseout", function () {$("#info").hide();});
+      // Show the map, ratings, etc.
+      $("#info").show();
       $("#subtitle").text("Is on the fucking menu for lunch.").show();
 
       // Show the options.
