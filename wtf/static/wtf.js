@@ -153,15 +153,18 @@
       // Show the aggregated ratings from Yelp.
       var reviews = "reviews";
       if (data.review_count == 1) reviews = "review";
-      $("#info-inner").html("<span>" + data.review_count + " " + reviews
+
+      $("#info-inner").html("<a href=\"" + data.url + "\" target=\"_blank\">"
+                            + "<span>" + data.review_count + " " + reviews
                             + " on Yelp: </span>"
-                            + "<img src=\"" + data.rating_image + "\">");
+                            + "<img src=\"" + data.rating_image + "\"></a>"
+                            + "<br>" + data.categories
+                            + "<br>" + data.address
+                            );
 
       // Show the map image.
+      $("#map-link").attr("href", data.map_link);
       $("#map-img").attr("src", data.map_url);
-
-      // List the categories.
-      $("#info-categories").text(data.categories);
     },
     error: function (msg) {
       $("#status-message").hide();

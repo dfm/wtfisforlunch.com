@@ -169,6 +169,7 @@ def main(rejectid=None):
     return json.dumps({
             "id": choice["id"],
             "name": choice["name"],
+            "address": ", ".join(choice["location"]["display_address"]),
             "categories": ", ".join([c[0] for c in choice["categories"]]),
             "reject_url": flask.url_for(".main", rejectid=choice["id"]),
             "accept_url": flask.url_for(".accept", acceptid=choice["id"]),
@@ -178,7 +179,9 @@ def main(rejectid=None):
             "review_count": choice["review_count"],
             "distance": best[2],
             "probability": best[0],
-            "map_url": map_url
+            "map_url": map_url,
+            "map_link": "http://maps.google.com/?q=" + choice["name"] \
+                    + ", " + ", ".join(choice["location"]["display_address"])
         })
 
 
