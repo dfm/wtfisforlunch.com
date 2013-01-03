@@ -151,13 +151,13 @@ def main(rejectid=None):
     resp = r.json()
     map_url = "http://maps.googleapis.com/maps/api/staticmap" \
                 "?zoom=15&size=400x200&scale=2&sensor=false" \
-                + "&markers={latitude},{longitude}" \
+                + "&markers=label:A|{latitude},{longitude}" \
                     .format(**choice["location"]["coordinate"])
                 # "&key=" + flask.current_app.config["GOOGLE_WEB_KEY"] \
     if r.status_code == requests.codes.ok and resp["status"] == "OK":
         # Add the route to the map.
         route = resp["routes"][0]["overview_polyline"]["points"]
-        map_url += "&markers=color:green|{1},{0}".format(*loc) \
+        map_url += "&markers=label:B|{1},{0}".format(*loc) \
                  + "&path=color:0x0000ff|weight:5|enc:" + route
 
     return json.dumps({
