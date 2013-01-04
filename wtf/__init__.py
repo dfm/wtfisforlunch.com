@@ -41,7 +41,7 @@ def before_request():
 
     # Redis database.
     flask.g.redis = redis.StrictRedis.from_url(
-            os.environ.get("REDISCLOUD_URL", "redis://localhost:6379"))
+            os.environ.get("REDISTOGO_URL", "redis://localhost:6379"))
 
 
 def teardown_request(exception):

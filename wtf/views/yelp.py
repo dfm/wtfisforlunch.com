@@ -57,6 +57,8 @@ def main(rejectid=None, blackid=None):
             pipe.expire(rediskey, 12 * 60 * 60)
             pipe.execute()
 
+            print(rediskey, flask.g.redis.smembers(rediskey))
+
     # Parse the location coordinates.
     a = flask.request.args
     if "longitude" in a and "latitude" in a:
