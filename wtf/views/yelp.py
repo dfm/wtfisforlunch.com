@@ -34,16 +34,28 @@ def main(rejectid=None, blackid=None):
     # Get the currently logged in user.
     user = current_user()
 
-    # Reject the proposal for today.
-    if rejectid is not None:
-        rejection = Proposal.from_id(rejectid)
-        print(rejection.user, flask.request.remote_addr)
-
     # Blacklist the proposal forever.
-    if user is not None and blackid is not None:
-        rejection = Proposal.from_id(blackid)
-        if rejection is not None:
-            user.blacklist(rejection["id"])
+    if blackid is not None:
+        if user is not None:
+            proposal = Proposal.from_id(blackid)
+            if proposal is not None:
+                user.blacklist(proposal["id"])
+        else:
+            rejectid = blackid
+
+    # Reject the proposal for today.
+    rediskey = "blacklist:"
+    if user is None:
+        rediskey += unicode(flask.request.remote_addr)
+    else:
+        rediskey += unicode(user._id)
+    if rejectid is not None:
+        proposal = Proposal.from_id(rejectid)
+        if proposal is not None:
+            pipe = flask.g.redis.pipeline()
+            pipe.sadd(rediskey, proposal["id"])
+            pipe.expire(rediskey, 12 * 60 * 60)
+            pipe.execute()
 
     # Parse the location coordinates.
     a = flask.request.args
@@ -123,6 +135,10 @@ def main(rejectid=None, blackid=None):
             bl = user._doc.get("blacklist", [])
             if choice["id"] in bl:
                 continue
+
+        # Check the cached temporary blacklist.
+        if flask.g.redis.sismember(rediskey, choice["id"]) != 0:
+            continue
 
         # Get the aggregate user rating.
         n0, r0 = 5, choice.get("rating", 0.0)

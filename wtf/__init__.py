@@ -8,6 +8,7 @@ import flask.ext.login as login_ext
 import os
 import logging
 
+import redis
 import pymongo
 
 from wtf.views.yelp import yelp
@@ -36,12 +37,11 @@ def before_request():
     c.ensure_index("token")
     c.ensure_index("open_id")
 
-    # c = .c()
-    # c.ensure_index("uid")
-    # c.ensure_index("rid")
-    # c.ensure_index("date")
-    # c.ensure_index("followed_up")
-    # c.ensure_index("proposed")
+    # c = Proposal.c()
+
+    # Redis database.
+    flask.g.redis = redis.StrictRedis.from_url(
+            os.environ.get("REDISCLOUD_URL", "redis://localhost:6379"))
 
 
 def teardown_request(exception):

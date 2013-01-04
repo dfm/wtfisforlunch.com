@@ -8,3 +8,4 @@ requests==1.0.4
 pymongo==2.4.1
 SimpleAES==1.0
 newrelic
+redis==2.7.2
