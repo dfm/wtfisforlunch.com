@@ -2,6 +2,7 @@ from __future__ import print_function, absolute_import, unicode_literals
 
 import flask
 import json
+import urllib
 
 import numpy as np
 import requests
@@ -184,13 +185,13 @@ def main(rejectid=None, blackid=None):
     resp = r.json()
     map_url = "http://maps.googleapis.com/maps/api/staticmap" \
                 "?zoom=15&size=400x200&scale=2&sensor=false" \
-                + "&markers=label:A|{latitude},{longitude}" \
+                + "&markers=label:B|{latitude},{longitude}" \
                     .format(**choice["location"]["coordinate"])
                 # "&key=" + flask.current_app.config["GOOGLE_WEB_KEY"] \
     if r.status_code == requests.codes.ok and resp["status"] == "OK":
         # Add the route to the map.
         route = resp["routes"][0]["overview_polyline"]["points"]
-        map_url += "&markers=label:B|{1},{0}".format(*loc) \
+        map_url += "&markers=label:A|{1},{0}".format(*loc) \
                  + "&path=color:0x0000ff|weight:5|enc:" + route
     result = {
         "id": choice["id"],
@@ -205,8 +206,11 @@ def main(rejectid=None, blackid=None):
         "distance": best[2],
         "probability": best[0],
         "map_url": map_url,
-        "map_link": "http://maps.google.com/?q=" + choice["name"] \
-                + ", " + ", ".join(choice["location"]["display_address"])
+        "map_link": "http://maps.google.com/?q=" + urllib.quote(choice["name"]
+                + ", " + ", ".join(l["address"])
+                + ", " + ", ".join([l[k] for k in ["city", "state_code",
+                                                   "country_code",
+                                                   "postal_code"]]))
     }
 
     # Save the proposal.
