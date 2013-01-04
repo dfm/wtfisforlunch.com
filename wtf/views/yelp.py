@@ -47,7 +47,8 @@ def main(rejectid=None, blackid=None):
     rediskey = "blacklist:"
     if user is None:
         rediskey += unicode(flask.request.remote_addr)
-        print(flask.request.headers.keys())
+        h = flask.request.headers
+        print([(k, h[k]) for k in h.keys()])
     else:
         rediskey += unicode(user._id)
     if rejectid is not None:
