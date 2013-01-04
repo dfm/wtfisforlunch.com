@@ -46,9 +46,9 @@ def main(rejectid=None, blackid=None):
     # Reject the proposal for today.
     rediskey = "blacklist:"
     if user is None:
-        rediskey += unicode(flask.request.remote_addr)
         h = flask.request.headers
-        print([(k, h[k]) for k in h.keys()])
+        rediskey += h.get("X-Forwarded-For",
+                          unicode(flask.request.remote_addr))
     else:
         rediskey += unicode(user._id)
     if rejectid is not None:
