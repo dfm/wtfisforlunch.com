@@ -59,8 +59,6 @@ def main(rejectid=None, blackid=None):
             pipe.expire(rediskey, 12 * 60 * 60)
             pipe.execute()
 
-            print(rediskey, flask.g.redis.smembers(rediskey))
-
     # Parse the location coordinates.
     a = flask.request.args
     if "longitude" in a and "latitude" in a:
@@ -199,6 +197,7 @@ def main(rejectid=None, blackid=None):
         "name": choice["name"],
         "address": ", ".join(choice["location"]["display_address"]),
         "categories": ", ".join([c[0] for c in choice["categories"]]),
+        "short_categories": [c[1] for c in choice["categories"]],
         "url": choice["url"],
         "rating": choice.get("rating", 0.0),
         "rating_image": choice["rating_img_url"],
