@@ -4,7 +4,9 @@
 
   var wtf = root.WTF = {
     coordinates: null,
-    api_url: "/api/"
+    api_url: "/api/",
+    reject_url: null,
+    blacklist_url: null
   };
 
   // General interface interaction.
@@ -89,12 +91,14 @@
   };
 
   // API interaction.
-  wtf.get_suggestion = function () {
+  wtf.get_suggestion = function (url) {
     // Make sure that we *do* have coordinates of some sort.
     if (typeof wtf.coordinates === "undefined" || wtf.coordinates === null) {
       wtf.display_error("Where the fuck are you?");
       return;
     }
+
+    if (arguments.length == 0 || url == null) url = wtf.api_url;
 
     // Sync the interface.
     $("#location").hide();
@@ -111,7 +115,7 @@
                         .show();
 
     // Send the request.
-    $.ajax({url: wtf.api_url,
+    $.ajax({url: url,
             data: wtf.coordinates,
             dataType: "json",
             success: wtf.suggestion.success,
@@ -122,8 +126,9 @@
   wtf.suggestion = {
     success: function (data, code, xhr) {
       // Update the API url.
-      wtf.api_url = data.reject_url;
       wtf.accept_url = data.accept_url;
+      wtf.reject_url = data.reject_url;
+      wtf.blacklist_url = data.blacklist_url;
 
       // Hide the patience message.
       $("#status-message").hide();
@@ -176,7 +181,7 @@
     }
   };
 
-  // Accept the suggestion.
+  // What to do about the suggestion.
   wtf.accept = function () {
     wtf.api_url = "/api/";
     $("#subtitle").html("Fucking enjoy it! "
@@ -186,6 +191,14 @@
 
     // Send the acceptance message.
     $.ajax({url: wtf.accept_url});
+  };
+
+  wtf.reject = function () {
+    return wtf.get_suggestion(wtf.reject_url);
+  };
+
+  wtf.blacklist = function () {
+    return wtf.get_suggestion(wtf.blacklist_url);
   };
 
   $(function () {

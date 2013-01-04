@@ -13,7 +13,7 @@ import pymongo
 from wtf.views.yelp import yelp
 from wtf.login import create_login, login_handler, logout_handler
 from wtf.error_handlers import TLSSMTPHandler
-from wtf.models import User, Visit
+from wtf.models import User
 
 
 def index_view():
@@ -36,12 +36,12 @@ def before_request():
     c.ensure_index("token")
     c.ensure_index("open_id")
 
-    c = Visit.c()
-    c.ensure_index("uid")
-    c.ensure_index("rid")
-    c.ensure_index("date")
-    c.ensure_index("followed_up")
-    c.ensure_index("proposed")
+    # c = .c()
+    # c.ensure_index("uid")
+    # c.ensure_index("rid")
+    # c.ensure_index("date")
+    # c.ensure_index("followed_up")
+    # c.ensure_index("proposed")
 
 
 def teardown_request(exception):

@@ -8,6 +8,8 @@ import requests
 from requests_oauthlib import OAuth1
 
 from wtf.geo import propose_position, lnglat2xyz, rearth
+from wtf.login import current_user
+from wtf.models import Proposal
 from wtf.email_utils import send_msg
 from wtf.acceptance_model import AcceptanceModel
 
@@ -27,9 +29,21 @@ def get_categories():
 
 @yelp.route("/")
 @yelp.route("/reject/<rejectid>")
-def main(rejectid=None):
+@yelp.route("/blacklist/<blackid>")
+def main(rejectid=None, blackid=None):
+    # Get the currently logged in user.
+    user = current_user()
+
+    # Reject the proposal for today.
     if rejectid is not None:
-        pass
+        rejection = Proposal.from_id(rejectid)
+        print(rejection.user, flask.request.remote_addr)
+
+    # Blacklist the proposal forever.
+    if user is not None and blackid is not None:
+        rejection = Proposal.from_id(blackid)
+        if rejection is not None:
+            user.blacklist(rejection["id"])
 
     # Parse the location coordinates.
     a = flask.request.args
@@ -104,6 +118,12 @@ def main(rejectid=None):
     for ind in inds:
         choice = data[ind]
 
+        # Check the user blacklist.
+        if user is not None:
+            bl = user._doc.get("blacklist", [])
+            if choice["id"] in bl:
+                continue
+
         # Get the aggregate user rating.
         n0, r0 = 5, choice.get("rating", 0.0)
         nratings = choice.get("review_count", 0)
@@ -136,16 +156,11 @@ def main(rejectid=None):
     # Try and get the directions.
     l = choice["location"]
     params = {
-            "mode": "walking",
-            "sensor": "false",
-            "origin": "{1},{0}".format(*loc),
-            "destination": "{latitude},{longitude}".format(
-                            **(l["coordinate"]))
-            # "destination": "\n".join(l["address"])
-            #                + "\n" + l["city"]
-            #                + "\n" + l["state_code"]
-            #                + "\n" + l["country_code"]
-            #                + "\n" + l["postal_code"]
+                "mode": "walking",
+                "sensor": "false",
+                "origin": "{1},{0}".format(*loc),
+                "destination": "{latitude},{longitude}".format(
+                                **(l["coordinate"]))
             }
     r = requests.get(google_directions_url, params=params)
     resp = r.json()
@@ -159,24 +174,32 @@ def main(rejectid=None):
         route = resp["routes"][0]["overview_polyline"]["points"]
         map_url += "&markers=label:B|{1},{0}".format(*loc) \
                  + "&path=color:0x0000ff|weight:5|enc:" + route
+    result = {
+        "id": choice["id"],
+        "name": choice["name"],
+        "address": ", ".join(choice["location"]["display_address"]),
+        "categories": ", ".join([c[0] for c in choice["categories"]]),
+        "url": choice["url"],
+        "rating": choice.get("rating", 0.0),
+        "rating_image": choice["rating_img_url"],
+        "review_count": choice["review_count"],
+        "distance": best[2],
+        "probability": best[0],
+        "map_url": map_url,
+        "map_link": "http://maps.google.com/?q=" + choice["name"] \
+                + ", " + ", ".join(choice["location"]["display_address"])
+    }
 
-    return json.dumps({
-            "id": choice["id"],
-            "name": choice["name"],
-            "address": ", ".join(choice["location"]["display_address"]),
-            "categories": ", ".join([c[0] for c in choice["categories"]]),
-            "reject_url": flask.url_for(".main", rejectid=choice["id"]),
-            "accept_url": flask.url_for(".accept", acceptid=choice["id"]),
-            "url": choice["url"],
-            "rating": choice.get("rating", 0.0),
-            "rating_image": choice["rating_img_url"],
-            "review_count": choice["review_count"],
-            "distance": best[2],
-            "probability": best[0],
-            "map_url": map_url,
-            "map_link": "http://maps.google.com/?q=" + choice["name"] \
-                    + ", " + ", ".join(choice["location"]["display_address"])
-        })
+    # Save the proposal.
+    if user is None:
+        prop = Proposal.new(None, **result)
+    else:
+        prop = Proposal.new(user._id, **result)
+    result["accept_url"] = flask.url_for(".accept", acceptid=prop._id)
+    result["reject_url"] = flask.url_for(".main", rejectid=prop._id)
+    result["blacklist_url"] = flask.url_for(".main", blackid=prop._id)
+
+    return json.dumps(result)
 
 
 @yelp.route("/accept/<acceptid>")

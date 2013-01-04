@@ -1,6 +1,7 @@
 from __future__ import print_function, absolute_import, unicode_literals
 
-__all__ = ["check_login", "create_login", "login_handler", "logout_handler"]
+__all__ = ["check_login", "create_login", "login_handler", "logout_handler",
+           "current_user"]
 
 import os
 import flask
@@ -16,6 +17,12 @@ oid = OpenID()
 def check_login():
     return (login_ext.current_user is not None
                 and login_ext.current_user.is_authenticated())
+
+
+def current_user():
+    if check_login():
+        return login_ext.current_user
+    return None
 
 
 def load_user(_id):
