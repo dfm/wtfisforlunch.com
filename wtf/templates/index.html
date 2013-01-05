@@ -22,6 +22,10 @@
     <div id="status-message"></div>
 </div>
 
+<div id="yelp-logo">
+    <img src="{{ url_for("static", filename="yelp.png") }}">
+</div>
+
 <div id="supertitle">
     {% if user %}Hi {{ user.fullname }}.{% else %}Hello stranger.{% endif %}
 </div>

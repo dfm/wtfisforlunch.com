@@ -60,6 +60,12 @@ a:hover {
     display: none;
 }
 
+#yelp-logo {
+    position: fixed;
+    top: 5px;
+    right: 5px;
+}
+
 #supertitle, #title, #subtitle, #options, #location {
     font-weight: 600;
     padding: 0.5em 0;
