@@ -186,7 +186,7 @@
     wtf.api_url = "/api/";
     $("#subtitle").html("Fucking enjoy it! "
                         + "<a href=\"javascript:WTF.get_suggestion();\">"
-                        + "Get another suggestion.</a>");
+                        + "Get another suggestion.</a>").show();
     $("#options").hide();
 
     // Send the acceptance message.
