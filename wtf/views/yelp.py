@@ -184,7 +184,7 @@ def main(rejectid=None, blackid=None):
     r = requests.get(google_directions_url, params=params)
     resp = r.json()
     map_url = "http://maps.googleapis.com/maps/api/staticmap" \
-                "?zoom=15&size=400x200&scale=2&sensor=false" \
+                "?zoom=15&size=300x300&scale=2&sensor=false" \
                 + "&markers=label:B|{latitude},{longitude}" \
                     .format(**choice["location"]["coordinate"])
                 # "&key=" + flask.current_app.config["GOOGLE_WEB_KEY"] \
