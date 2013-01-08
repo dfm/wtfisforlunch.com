@@ -75,7 +75,7 @@ def create_app():
     app.add_url_rule("/logout", "logout", logout_handler)
 
     # Share urls.
-    app.add_url_rule("/s/<short_url>", "share", share_view)
+    app.add_url_rule("/share/<short_url>", "share", share_view)
     app.add_url_rule("/<short_url>", "share", share_view)
 
     # Pre- and post-request hooks.
