@@ -15,9 +15,16 @@
         <span id="error-message">This is an error.</span>
     </div>
 
+    {% if proposal %}
     <div id="header-message">
-        Did you ever end up going...
+        Did you ever end up going to
+        <a href="{{ proposal.url }}" target="_blank">{{ proposal.name }}</a>?
+        <br>
+        Yeah and it was <a href="javascript:WTF.report('{{ proposal._id }}', 2);">fucking awesome</a>
+        / <a href="javascript:WTF.report('{{ proposal._id }}', 1);">not the best</a> or
+        <a href="javascript:WTF.report('{{ proposal._id }}', 0);">hell no</a>.
     </div>
+    {% endif %}
 
     <div id="status-message"></div>
 </div>
@@ -27,7 +34,8 @@
 </div>
 
 <div id="supertitle">
-    {% if user %}Hi {{ user.fullname }}.{% else %}Hello stranger.{% endif %}
+  {% if user %}Hi {{ user.fullname }}.{% else %}Hello stranger. Why don't you
+  <a href="{{ url_for("login") }}">log the fuck in</a>?{% endif %}
 </div>
 
 <div id="title-wrapper">

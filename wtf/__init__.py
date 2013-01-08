@@ -21,9 +21,12 @@ def index_view():
     user = login_ext.current_user
     if not user.is_authenticated():
         user = None
+        proposal = None
+    else:
+        proposal = user.find_recent()
     return flask.render_template("index.html",
                     google_api_key=flask.current_app.config["GOOGLE_WEB_KEY"],
-                    user=user)
+                    user=user, proposal=proposal)
 
 
 def before_request():

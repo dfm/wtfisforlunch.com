@@ -41,6 +41,7 @@ def main(rejectid=None, blackid=None):
             proposal = Proposal.from_id(blackid)
             if proposal is not None:
                 user.blacklist(proposal["id"])
+                proposal.update_response(-2)
         else:
             rejectid = blackid
 
@@ -59,6 +60,11 @@ def main(rejectid=None, blackid=None):
             pipe.sadd(rediskey, proposal["id"])
             pipe.expire(rediskey, 12 * 60 * 60)
             pipe.execute()
+
+            if user is None:
+                proposal.remove()
+            else:
+                proposal.update_response(0)
 
     # Parse the location coordinates.
     a = flask.request.args
@@ -183,16 +189,26 @@ def main(rejectid=None, blackid=None):
             }
     r = requests.get(google_directions_url, params=params)
     resp = r.json()
-    map_url = "http://maps.googleapis.com/maps/api/staticmap" \
-                "?zoom=15&size=300x300&scale=2&sensor=false" \
-                + "&markers=label:B|{latitude},{longitude}" \
-                    .format(**choice["location"]["coordinate"])
-                # "&key=" + flask.current_app.config["GOOGLE_WEB_KEY"] \
+
+    # Build the static map URL.
+    map_params = {
+            "size": "300x300",
+            "scale": 2,
+            "sensor": "false",
+            "markers": "label:B|{latitude},{longitude}"
+                        .format(**choice["location"]["coordinate"])
+            }
+    map_url = "http://maps.googleapis.com/maps/api/staticmap?" + \
+              urllib.urlencode(map_params)
+
     if r.status_code == requests.codes.ok and resp["status"] == "OK":
         # Add the route to the map.
         route = resp["routes"][0]["overview_polyline"]["points"]
-        map_url += "&markers=label:A|{1},{0}".format(*loc) \
-                 + "&path=color:0x0000ff|weight:5|enc:" + route
+        map_url += "&" + urllib.urlencode({
+                            "markers": "label:A|{1},{0}".format(*loc),
+                            "path": "color:0x0000ff|weight:5|enc:" + route
+                            })
+
     result = {
         "id": choice["id"],
         "name": choice["name"],
@@ -227,4 +243,83 @@ def main(rejectid=None, blackid=None):
 
 @yelp.route("/accept/<acceptid>")
 def accept(acceptid):
-    return "Success."
+    # Get the current user.
+    user = current_user()
+
+    # Try to find the proposal.
+    prop = Proposal.from_id(acceptid)
+    if prop is None:
+        return json.dumps({"message": "Unknown proposal."})
+
+    # If not logged in, remove the proposal.
+    if prop.user_id is None or user is None:
+        prop.remove()
+        return json.dumps({"message": "No user."})
+
+    # Update the proposal for posterity.
+    prop.update_response(1)
+
+    # Send the email.
+    text = """Hey {0.fullname},
+
+It looks like you're heading to {1.name} at {1.address}.
+
+For more info about this restaurant: {1.url}
+
+Here's a goddamn map: {1.map_link}
+
+Fucking enjoy it.
+
+Sincerely,
+The Lunch Robot
+robot@wtfisforlunch.com
+
+""".format(user, prop)
+
+    html = """<p>Hey {0.fullname},</p>
+
+<p>Looks like you're heading to <a href="{1.url}">{1.name}</a> for lunch
+today.</p>
+
+<p style="text-align: center;"><strong>{1.name}</strong><br>
+{1.address}</p>
+
+<p style="text-align: center;">
+<a href="{1.map_link}"><img src="{1.map_url}" style="width: 400px;"></a></p>
+
+<p>Fucking enjoy it.</p>
+
+<p>Sincerely,<br>
+The Lunch Robot<br>
+<a href="mailto:robot@wtfisforlunch.com">robot@wtfisforlunch.com</a></p>
+
+""".format(user, prop)
+
+    try:
+        send_msg("{0.fullname} <{0.email}>".format(user), text,
+                 "Lunch at {0}".format(prop.name), html=html)
+    except Exception as e:
+        print("EMAIL ERROR: ", e)
+        return json.dumps({"message": "Better luck next time."})
+
+    return json.dumps({"message": "You got it."})
+
+
+@yelp.route("/report/<pid>/<int:value>")
+def report(pid, value):
+    # Get the current user.
+    user = current_user()
+
+    # Try to find the proposal.
+    prop = Proposal.from_id(pid)
+    if prop is None:
+        return json.dumps({"message": "Unknown proposal."})
+
+    # If not logged in, remove the proposal.
+    if prop.user_id is None or user is None:
+        prop.remove()
+        return json.dumps({"message": "No user."})
+
+    prop.report(value)
+
+    return json.dumps({"message": "You got it."})

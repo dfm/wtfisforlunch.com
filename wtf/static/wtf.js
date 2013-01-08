@@ -201,6 +201,12 @@
     return wtf.get_suggestion(wtf.blacklist_url);
   };
 
+  // Did the user actually go?
+  wtf.report = function (pid, val) {
+    $.ajax({url: "/api/report/" + pid + "/" + val});
+    $("#header-message").hide();
+  };
+
   $(function () {
     // Check for geolocation.
     if (Modernizr.geolocation) $("#location-icon").show();

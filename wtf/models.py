@@ -2,13 +2,13 @@ __all__ = ["Proposal", "User"]
 
 
 import os
-# from datetime import datetime
+from datetime import datetime
 
 import flask
 from flask.ext.login import UserMixin
 from SimpleAES import SimpleAES
 
-# import pymongo
+import pymongo
 from bson.objectid import ObjectId
 
 
@@ -22,6 +22,7 @@ class Proposal(object):
         doc = dict(doc)
         doc["user_id"] = uid
         doc["_id"] = cls.c().insert(doc)
+        doc["date"] = datetime.now()
         return cls(doc)
 
     def __getitem__(self, k):
@@ -29,6 +30,26 @@ class Proposal(object):
 
     def __getattr__(self, k):
         return self._doc[k]
+
+    def remove(self):
+        self.c().remove({"_id": ObjectId(self._doc["_id"])}, safe=True)
+
+    def update_response(self, accepted):
+        self.c().update({"_id": ObjectId(self._doc["_id"])},
+                        {"$set": {"accepted": accepted,
+                                  "date": datetime.now()}})
+
+    def report(self, value):
+        if value == 2:
+            self.c().update({"_id": ObjectId(self._doc["_id"])},
+                            {"$set": {"accepted": 2,
+                                      "date": datetime.now()}})
+        elif value == 1:
+            self.c().update({"_id": ObjectId(self._doc["_id"])},
+                            {"$set": {"accepted": -1,
+                                      "date": datetime.now()}})
+        else:
+            self.remove()
 
     @staticmethod
     def c():
@@ -139,10 +160,11 @@ class User(UserMixin):
             bl.append(rid)
         self._doc["blacklist"] = bl
 
-    # def find_recent(self):
-    #     v = list(Proposal.c().find({"uid": self._id, "proposed": True,
-    #                                               "followed_up": False})
-    #                       .sort([("date", pymongo.DESCENDING)]).limit(1))
-    #     if len(v) == 0:
-    #         return None
-    #     return Visit(v[0])
+    def find_recent(self):
+        v = list(Proposal.c().find({"user_id": self._id, "accepted": 1})
+                             .sort([("date", pymongo.DESCENDING)]).limit(1))
+
+        if len(v) == 0:
+            return None
+
+        return Proposal(v[0])
