@@ -320,6 +320,9 @@ def report(pid, value):
         prop.remove()
         return json.dumps({"message": "No user."})
 
-    prop.report(value)
+    url = prop.report(value)
+    if url is not None:
+        url = flask.url_for("share", short_url=url)
 
-    return json.dumps({"message": "You got it."})
+    return json.dumps({"message": "You got it.",
+                       "url": url})

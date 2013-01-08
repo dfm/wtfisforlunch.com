@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block hextra %}
+{% endblock %}
+
+{% block content %}
+
+<div id="yelp-logo">
+    <a href="http://yelp.com" target="_blank"><img src="{{ url_for("static", filename="yelp.png") }}"></a>
+</div>
+
+<div id="supertitle">
+    {{ proposal.user.fullname }} had a great fucking lunch at
+</div>
+
+<div id="title-wrapper">
+    <div id="title">
+        <a href="{{ proposal.url }}" target="_blank">{{ proposal.name }}</a>
+    </div>
+</div>
+
+<div id="subtitle" style="display: block;">
+    <a href="{{ url_for("index") }}">Try it out</a> for yourself.
+</div>
+
+<div id="options" style="display: block;">
+    Or share this link:
+    <a href="http://4ln.ch/{{ proposal.short_url }}">4ln.ch/{{ proposal.short_url }}</a>.
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}

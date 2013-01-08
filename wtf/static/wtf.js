@@ -203,7 +203,14 @@
 
   // Did the user actually go?
   wtf.report = function (pid, val) {
-    $.ajax({url: "/api/report/" + pid + "/" + val});
+    $.ajax({url: "/api/report/" + pid + "/" + val,
+            dataType: "json",
+            success: function (response) {
+              var url = response.url;
+              if (typeof url !== "undefined" && url != null)
+                window.location = url;
+            }
+    });
     $("#header-message").hide();
   };
 

@@ -41,15 +41,20 @@ class Proposal(object):
 
     def report(self, value):
         if value == 2:
+            url = self.get_counter()
             self.c().update({"_id": ObjectId(self._doc["_id"])},
                             {"$set": {"accepted": 2,
-                                      "date": datetime.now()}})
+                                      "date": datetime.now(),
+                                      "short_url": url}})
+            return url
         elif value == 1:
             self.c().update({"_id": ObjectId(self._doc["_id"])},
                             {"$set": {"accepted": -1,
                                       "date": datetime.now()}})
         else:
             self.remove()
+
+        return None
 
     @staticmethod
     def c():
@@ -78,7 +83,7 @@ class Proposal(object):
         c = flask.g.db.counters
         tag = None
         while tag is None or tag in ["about", "me", "magic", "yelp", "google",
-                                     "lunch"]:
+                                     "lunch", "login", "logout"]:
             o = c.find_and_modify({"_id": "visit_id"}, {"$inc": {"count": 1}},
                                   new=True, upsert=True)
 

@@ -14,7 +14,7 @@ import pymongo
 from wtf.views.yelp import yelp
 from wtf.login import create_login, login_handler, logout_handler
 from wtf.error_handlers import TLSSMTPHandler
-from wtf.models import User
+from wtf.models import User, Proposal
 
 
 def index_view():
@@ -29,6 +29,13 @@ def index_view():
                     user=user, proposal=proposal)
 
 
+def share_view(short_url):
+    prop = Proposal.c().find_one({"short_url": short_url})
+    if prop is not None:
+        return flask.render_template("share.html", proposal=Proposal(prop))
+    return flask.redirect(flask.url_for("index"))
+
+
 def before_request():
     uri = os.environ.get("MONGOLAB_URI", "mongodb://localhost/wtflunch")
     flask.g.dbc = pymongo.Connection(host=uri)
@@ -40,7 +47,11 @@ def before_request():
     c.ensure_index("token")
     c.ensure_index("open_id")
 
-    # c = Proposal.c()
+    c = Proposal.c()
+    c.ensure_index("accepted")
+    c.ensure_index("date")
+    c.ensure_index("user_id")
+    c.ensure_index("short_url")
 
     # Redis database.
     flask.g.redis = redis.StrictRedis.from_url(
@@ -62,6 +73,10 @@ def create_app():
     app.add_url_rule("/", "index", index_view)
     app.add_url_rule("/login", "login", login_handler)
     app.add_url_rule("/logout", "logout", logout_handler)
+
+    # Share urls.
+    app.add_url_rule("/s/<short_url>", "share", share_view)
+    app.add_url_rule("/<short_url>", "share", share_view)
 
     # Pre- and post-request hooks.
     app.before_request(before_request)
