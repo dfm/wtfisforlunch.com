@@ -102,6 +102,34 @@ class Proposal(object):
         return tag
 
 
+class Listing(object):
+
+    pass
+
+
+class YelpListing(Listing):
+
+    def __init__(self, doc):
+        self.id = doc["id"]
+        self.name = doc["name"]
+        self.location = doc["location"]["coordinate"]
+        self.url = doc["url"]
+        self.address = ", ".join(doc["location"]["display_address"]),
+
+        l = doc["location"]
+        self.search_address = doc["name"] \
+                + ", " + ", ".join(l["address"]) \
+                + ", " + ", ".join([l[k] for k in ["city", "state_code",
+                                                   "country_code",
+                                                   "postal_code"]])
+
+        self.categories = ", ".join([c[0] for c in doc["categories"]]),
+        self.short_categories = [c[1] for c in doc["categories"]],
+        self.rating = doc.get("rating", 0.0)
+        self.rating_img_url = doc["rating_img_url"]
+        self.review_count = doc.get("review_count", 0)
+
+
 class User(UserMixin):
 
     def __init__(self, kwargs):

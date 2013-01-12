@@ -24,3 +24,7 @@ class WTFConfig(object):
     YELP_API_CSEC = unicode(os.environ["API_CSEC"])
     YELP_API_TOKEN = unicode(os.environ["API_TOKEN"])
     YELP_API_TSEC = unicode(os.environ["API_TSEC"])
+
+    # Foursquare.
+    FOURSQUARE_ID = unicode(os.environ["FOURSQUARE_ID"])
+    FOURSQUARE_SECRET = unicode(os.environ["FOURSQUARE_SECRET"])
