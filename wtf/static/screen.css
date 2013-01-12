@@ -184,9 +184,22 @@ input[type="text"] {
  *   MEDIA QUERIES   *
  *                   */
 
-@media all and (max-width: 640px) {
+@media all and (max-width: 710px) {
     body {
         padding-bottom: 0;
+    }
+
+    #header {
+        position: relative;
+        margin-bottom: 30px;
+    }
+
+    #supertitle, #title, #subtitle, #options, #location {
+        margin: 0 20px;
+    }
+
+    #info {
+        padding: 25px 20px;
     }
 
     #map-img {
