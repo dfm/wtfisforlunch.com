@@ -11,7 +11,7 @@ import logging
 import redis
 import pymongo
 
-from wtf.views.yelp import yelp
+from wtf.views.foursquare import api
 from wtf.login import create_login, login_handler, logout_handler
 from wtf.error_handlers import TLSSMTPHandler
 from wtf.models import User, Proposal
@@ -67,7 +67,7 @@ def create_app():
     app.config.from_object("wtf.config_defaults.WTFConfig")
 
     # Add the blueprint(s).
-    app.register_blueprint(yelp, url_prefix="/api")
+    app.register_blueprint(api, url_prefix="/api")
 
     # Attach routes.
     app.add_url_rule("/", "index", index_view)

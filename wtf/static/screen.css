@@ -33,8 +33,8 @@ a:hover {
 }
 
 #error {
-    padding: 8px;
-    background: #9d261d;
+    padding: 4px;
+    background: #9a261d;
     border-bottom: 1px solid #600;
     color: #eee;
     text-align: center;
@@ -61,12 +61,13 @@ a:hover {
 
 #yelp-logo {
     position: fixed;
-    top: 5px;
+    top: 8px;
     right: 5px;
 }
 
 #yelp-logo img {
     border: 0;
+    width: 241px;
 }
 
 #supertitle, #title, #subtitle, #options, #location {
@@ -99,30 +100,28 @@ a:hover {
 }
 
 #info-inner {
-    height: 70px;
     padding: 0;
+    padding-bottom: 10px;
+    font-size: 14px;
     font-weight: 300;
     font-style: italic;
     line-height: 1.3;
 }
 
-#info-inner span, #info-inner img {
-    font-weight: 600;
-    display: block;
-    float: left;
-}
-
-#info-inner img {
-    margin-top: 2px;
-    padding-left: 10px;
+#info-inner strong {
+    font-weight: bold;
+    font-size: 28px;
 }
 
 #map-img {
+    content: "";
     display: block;
-    width: 300px;
-    height: 300px;
+    width: 640px;
+    height: 200px;
     border: 1px solid #222;
     clear: both;
+    background-position: center;
+    background-size: cover;
 }
 
 #location-icon {
@@ -156,7 +155,7 @@ a:hover {
     position: fixed;
     bottom: 0;
     width: 100%;
-    padding: 12px;
+    padding: 12px 0;
     background: #eee;
     border-top: 1px solid #aaa;
     font-size: 0.9em;
@@ -178,4 +177,30 @@ input[type="text"] {
     border-bottom: 1px solid #222;
     padding: 3px 5px;
     margin: 0 10px;
+}
+
+
+/*                   *
+ *   MEDIA QUERIES   *
+ *                   */
+
+@media all and (max-width: 640px) {
+    body {
+        padding-bottom: 0;
+    }
+
+    #map-img {
+        width: 100%;
+    }
+
+    #footer {
+        position: relative;
+        margin-top: 50px;
+    }
+
+    #yelp-logo {
+        position: relative;
+        margin-top: 50px;
+        text-align: center;
+    }
 }

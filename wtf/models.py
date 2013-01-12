@@ -3,6 +3,7 @@ __all__ = ["Proposal", "User"]
 
 import os
 from datetime import datetime
+import numpy as np
 
 import flask
 from flask.ext.login import UserMixin
@@ -128,6 +129,33 @@ class YelpListing(Listing):
         self.rating = doc.get("rating", 0.0)
         self.rating_img_url = doc["rating_img_url"]
         self.review_count = doc.get("review_count", 0)
+
+
+class FoursquareListing(Listing):
+
+    def __init__(self, doc):
+        self.id = doc["id"]
+        self.name = doc["name"]
+        self.url = doc["canonicalUrl"]
+        self.categories = ", ".join([c["name"]
+                                    for c in doc.get("categories", [])])
+
+        l = doc["location"]
+        self.location = {"latitude": l["lat"], "longitude": l["lng"]}
+
+        a = [l[k] for k in ["address", "city", "state", "country",
+                            "postalCode"] if k in l]
+        self.address = ", ".join(a)
+
+        # Count the number of checkins, etc.
+        s = doc.get("stats", {})
+        total = [s[k] for k in ["checkinsCount", "usersCount", "tipCount"]]
+
+        # HACK MAGIC!!!!
+        self.rating = 0.5 * doc.get("rating", 10 * np.exp(-1000. / sum(total)))
+        self.review_count = sum(total)
+
+        self.price = doc.get("price", {}).get("tier", -1)
 
 
 class User(UserMixin):
