@@ -5,10 +5,6 @@
 
 {% block content %}
 
-<div id="yelp-logo">
-    <a href="http://yelp.com" target="_blank"><img src="{{ url_for("static", filename="yelp.png") }}"></a>
-</div>
-
 <div id="supertitle">
     {{ proposal.user.fullname }} had a great fucking lunch at
 </div>
@@ -26,6 +22,10 @@
 <div id="options" style="display: block;">
     Or share this link:
     <a href="http://4ln.ch/{{ proposal.short_url }}">4ln.ch/{{ proposal.short_url }}</a>.
+</div>
+
+<div id="yelp-logo">
+    <a href="http://foursquare.com" target="_blank"><img src="{{ url_for("static", filename="4sq.png") }}"></a>
 </div>
 
 {% endblock %}
