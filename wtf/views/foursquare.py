@@ -74,7 +74,7 @@ def main(rejectid=None, blackid=None):
     try:
         model = AcceptanceModel(*(user["model"]))
     except (TypeError, KeyError):
-        model = AcceptanceModel(1.0, 8.0, 1.0, 3.0)
+        model = AcceptanceModel(0.2, 8.0, 1.0, 3.0)
 
     # Blacklist the proposal forever.
     if blackid is not None:
