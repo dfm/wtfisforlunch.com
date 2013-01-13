@@ -21,7 +21,7 @@ api_url = "https://api.foursquare.com/v2/venues/explore"
 google_directions_url = "http://maps.googleapis.com/maps/api/directions/json"
 
 
-def get_listings(loc):
+def get_listings(loc, sigma2):
     c = flask.current_app.config
     payload = {"client_id": c["FOURSQUARE_ID"],
                "client_secret": c["FOURSQUARE_SECRET"],
@@ -32,7 +32,7 @@ def get_listings(loc):
     ntries = 3
     for i in range(ntries):
         # Propose a new position.
-        new_pos = propose_position(loc, np.sqrt(0.16))
+        new_pos = propose_position(loc, np.sqrt(sigma2))
         payload["ll"] = "{1},{0}".format(*new_pos)
 
         # Submit the search on Yelp.
@@ -70,6 +70,12 @@ def main(rejectid=None, blackid=None):
     # Get the currently logged in user.
     user = current_user()
 
+    # Get the acceptance model.
+    try:
+        model = AcceptanceModel(*(user["model"]))
+    except (TypeError, KeyError):
+        model = AcceptanceModel(1.0, 8.0, 1.0, 3.0)
+
     # Blacklist the proposal forever.
     if blackid is not None:
         if user is not None:
@@ -77,6 +83,10 @@ def main(rejectid=None, blackid=None):
             if proposal is not None:
                 user.blacklist(proposal["id"])
                 proposal.update_response(-2)
+
+                model.update(proposal.distance, proposal.rating,
+                             proposal.price, False, eta=0.02)
+                user.update_model(model.pars)
         else:
             rejectid = blackid
 
@@ -91,6 +101,13 @@ def main(rejectid=None, blackid=None):
     if rejectid is not None:
         proposal = Proposal.from_id(rejectid)
         if proposal is not None:
+            # Update the model.
+            if user is not None:
+                model.update(proposal.distance, proposal.rating,
+                             proposal.price, False, eta=0.01)
+                user.update_model(model.pars)
+
+            # Cache the rejection.
             pipe = flask.g.redis.pipeline()
             pipe.sadd(rediskey, proposal["id"])
             pipe.expire(rediskey, 12 * 60 * 60)
@@ -101,6 +118,8 @@ def main(rejectid=None, blackid=None):
             else:
                 proposal.update_response(0)
 
+    print("model", model.pars)
+
     # Parse the location coordinates.
     a = flask.request.args
     if "longitude" in a and "latitude" in a:
@@ -110,16 +129,13 @@ def main(rejectid=None, blackid=None):
                         "message": "You need to provide coordinates."}), 400
 
     # Find some yelp restaurant.
-    data = get_listings(loc)
+    data = get_listings(loc, model._sd2)
 
     if len(data) == 0:
         # We really couldn't find any results at all.
         return (json.dumps({"message":
             "We couldn't find any results. Maybe you should just stay home."}),
             404)
-
-    # Choose one of the restaurants.
-    model = AcceptanceModel(0.16, 8.0, 3.5)
 
     # Loop over the list of suggestions and accept or reject stochastically.
     inds = np.arange(len(data))
@@ -140,8 +156,11 @@ def main(rejectid=None, blackid=None):
 
         # Get the aggregate user rating.
         n0, r0 = 5, choice.rating
-        nratings = choice.review_count
-        rating = nratings * r0 / (n0 + nratings)
+        if r0 is not None:
+            nratings = choice.review_count
+            rating = nratings * r0 / (n0 + nratings)
+        else:
+            rating = None
 
         # Compute the distance.
         cloc = choice.location
@@ -150,7 +169,8 @@ def main(rejectid=None, blackid=None):
         dist = np.sqrt(2 * (rearth * rearth - np.dot(x1, x2)))
 
         # Compute the predictive acceptance probability.
-        prob = model.predict(dist, rating)
+        prob = model.predict(dist, rating, choice.price)
+        print(dist, rating, choice.price, prob)
         if prob > best[0]:
             best = (prob, ind, dist)
 
@@ -196,6 +216,7 @@ def main(rejectid=None, blackid=None):
         "address": choice.address,
         "url": choice.url,
         "rating": choice.rating,
+        "price": choice.price,
         "categories": choice.categories,
         "probability": best[0],
         "distance": best[2],

@@ -150,7 +150,6 @@
 
       // Show the map, ratings, etc.
       $("#info").show();
-      // $("#subtitle").text("Is on the fucking menu for lunch.").show();
 
       // Show the options.
       $("#options").show();
@@ -159,8 +158,24 @@
       var reviews = "reviews";
       if (data.review_count == 1) reviews = "review";
 
-      $("#info-inner").html("<strong>" + data.name + "</strong><br>"
-                            + data.categories + "<br>" + data.address);
+      var info = "<strong>" + data.name + "</strong><br>"
+                            + data.categories + "<br>";
+      info += data.address + "<br>";
+
+      var boolr = (typeof data.rating != "undefined" && data.rating != null),
+          boolp = (typeof data.price != "undefined" && data.price != null);
+
+      if (boolr)
+        info += "Rating: " + data.rating + " / 10<br>";
+      if (boolp) {
+        var k;
+        for (k = 0; k < data.price; ++k)
+          info += " $ ";
+        for (; k < 4; ++k)
+          info += " • ";
+      }
+
+      $("#info-inner").html(info);
 
       // Show the map image.
       $("#map-link").attr("href", data.map_link);

@@ -152,10 +152,10 @@ class FoursquareListing(Listing):
         total = [s[k] for k in ["checkinsCount", "usersCount", "tipCount"]]
 
         # HACK MAGIC!!!!
-        self.rating = 0.5 * doc.get("rating", 10 * np.exp(-1000. / sum(total)))
+        self.rating = doc.get("rating", None)
         self.review_count = sum(total)
 
-        self.price = doc.get("price", {}).get("tier", -1)
+        self.price = doc.get("price", {}).get("tier", None)
 
 
 class User(UserMixin):
@@ -229,3 +229,8 @@ class User(UserMixin):
             return None
 
         return Proposal(v[0])
+
+    def update_model(self, model_pars):
+        self.c().update({"_id": self._id},
+                        {"$set": {"model": list(model_pars)}})
+        self._doc["model"] = list(model_pars)

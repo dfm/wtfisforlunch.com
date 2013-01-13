@@ -20,5 +20,19 @@ def xyz2lnglat(xyz):
 
 
 def propose_position(ll0, sigma):
-    x = lnglat2xyz(*ll0) + sigma * np.random.randn(3)
+    r = sigma * np.random.rand()
+    th = 2 * np.pi * np.random.rand()
+    phi = 2 * np.pi * (0.5 - np.random.rand())
+    x = lnglat2xyz(*ll0) + r * np.array([np.cos(phi) * np.cos(th),
+                                         np.cos(phi) * np.sin(th),
+                                         np.sin(phi)])
     return xyz2lnglat(x)
+
+
+if __name__ == "__main__":
+    import matplotlib.pyplot as pl
+
+    for i in range(1000):
+        pos = propose_position([0, 0], 0.5)
+        pl.plot(pos[0], pos[1], ".k")
+    pl.savefig("geo.png")
