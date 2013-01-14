@@ -84,9 +84,9 @@ def main(rejectid=None, blackid=None):
                 user.blacklist(proposal["id"])
                 proposal.update_response(-2)
 
-                model.update(proposal.distance, proposal.rating,
-                             proposal.price, False, eta=0.02)
-                user.update_model(model.pars)
+                # model.update(proposal.distance, proposal.rating,
+                #              proposal.price, False, eta=0.02)
+                # user.update_model(model.pars)
         else:
             rejectid = blackid
 
@@ -102,10 +102,10 @@ def main(rejectid=None, blackid=None):
         proposal = Proposal.from_id(rejectid)
         if proposal is not None:
             # Update the model.
-            if user is not None:
-                model.update(proposal.distance, proposal.rating,
-                             proposal.price, False, eta=0.01)
-                user.update_model(model.pars)
+            # if user is not None:
+            #     model.update(proposal.distance, proposal.rating,
+            #                  proposal.price, False, eta=0.01)
+            #     user.update_model(model.pars)
 
             # Cache the rejection.
             pipe = flask.g.redis.pipeline()
