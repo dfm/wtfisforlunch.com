@@ -149,13 +149,11 @@ class FoursquareListing(Listing):
 
         # Count the number of checkins, etc.
         s = doc.get("stats", {})
-        total = [s[k] for k in ["checkinsCount", "usersCount", "tipCount"]]
-
-        # HACK MAGIC!!!!
-        self.rating = doc.get("rating", None)
-        self.review_count = sum(total)
-
+        self.checkins = s.get("checkinsCount", 0)
+        self.users = s.get("usersCount", 0)
+        self.likes = doc.get("likes", {}).get("count", 0)
         self.price = doc.get("price", {}).get("tier", None)
+        self.rating = doc.get("rating", None)
 
 
 class User(UserMixin):

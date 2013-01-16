@@ -112,6 +112,10 @@ a:hover {
     font-size: 28px;
 }
 
+#info-inner i {
+    font-size: 0.8em;
+}
+
 #map-img {
     content: "";
     display: block;

@@ -74,7 +74,7 @@ def main(rejectid=None, blackid=None):
     # try:
     #     model = AcceptanceModel(*(user["model"]))
     # except (TypeError, KeyError):
-    model = AcceptanceModel(0.2, 8.0, 1.0, 3.0)
+    model = AcceptanceModel(0.3, 2.0, 1.0, 3.0)
 
     # Blacklist the proposal forever.
     if blackid is not None:
@@ -157,7 +157,7 @@ def main(rejectid=None, blackid=None):
         # Get the aggregate user rating.
         n0, r0 = 5, choice.rating
         if r0 is not None:
-            nratings = choice.review_count
+            nratings = choice.likes
             rating = nratings * r0 / (n0 + nratings)
         else:
             rating = None
@@ -170,7 +170,7 @@ def main(rejectid=None, blackid=None):
 
         # Compute the predictive acceptance probability.
         prob = model.predict(dist, rating, choice.price)
-        print(dist, rating, choice.price, prob)
+        print(dist, rating, choice.price, prob, choice.likes)
         if prob > best[0]:
             best = (prob, ind, dist)
 
@@ -218,6 +218,9 @@ def main(rejectid=None, blackid=None):
         "rating": choice.rating,
         "price": choice.price,
         "categories": choice.categories,
+        "checkins": choice.checkins,
+        "users": choice.users,
+        "likes": choice.likes,
         "probability": best[0],
         "distance": best[2],
         "map_url": map_url,

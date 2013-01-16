@@ -162,12 +162,18 @@
                             + data.categories + "<br>";
       info += data.address + "<br>";
 
-      var boolr = (typeof data.rating != "undefined" && data.rating != null),
-          boolp = (typeof data.price != "undefined" && data.price != null);
-
-      if (boolr)
+      if (typeof data.rating != "undefined" && data.rating != null)
         info += "Rating: " + data.rating + " / 10<br>";
-      if (boolp) {
+
+      if (data.checkins > 1 && data.users > 1) {
+        info += data.checkins + " check-ins by " + data.users
+                + " Foursquare users<br>";
+      }
+
+      if (data.likes > 0)
+        info += "<i class=\"icon-heart\"></i> " + data.likes + "<br>";
+
+      if (typeof data.price != "undefined" && data.price != null) {
         var k;
         for (k = 0; k < data.price; ++k)
           info += " $ ";
