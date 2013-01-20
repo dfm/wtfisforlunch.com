@@ -1,34 +1,11 @@
-You'll need the following environment variables:
+You'll need some environment variables set.
 
 ```
-export GOOGLE_API_KEY=WHATEVER_KEY
-export GOOGLE_WEB_KEY=WHATEVER_KEY
-export MAIL_USERNAME=DUDE
-export MAIL_PASSWORD=PASSWWWWWWWOOOOORRRRRD
-```
+export FOURSQUARE_ID="BLAH"
+export FOURSQUARE_SECRET="BLAHBLAH2"
 
-The Model
----------
-
-The acceptance probability of a suggestion as a function of distance (`d`)
-and rating (`r`) is given by:
-
-```
-p_{acc} (r, d) = (r - a)^b / ((r - a)^b + c)
-```
-
-where each of `a`, `b` and `c` are linear functions of distance.
-Qualitatively:
-
-* `a` is the smallest rating accepted at a particular distance,
-* `b` describes the width of the transition region from low to high
-  probability, and
-* `c` does ...
-
-A good starting point for the functions is:
-
-```
-a(d) = 0.5 * d
-b(d) = 6 + d
-c(d) = 100 + 450 * d
+export GOOGLE_API_KEY="SOMESUCH"
+export GOOGLE_WEB_KEY="WHATEVER"
+export MAIL_USERNAME="email@gmail.com"
+export MAIL_PASSWORD="smarta$$pa$$word"
 ```

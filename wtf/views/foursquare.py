@@ -170,6 +170,18 @@ def main(rejectid=None, blackid=None):
 
         # Compute the predictive acceptance probability.
         prob = model.predict(dist, rating, choice.price)
+
+        # Check if you've already been there.
+        v = None
+        if user is not None:
+            v = Proposal.c().find_one({"user_id": user._id,
+                                       "accepted": {"$in": [2, -1]}})
+
+        # Down weight the probability if you have been there.
+        if v is not None:
+            # HACKISH MAGIC.
+            prob = 0.1 * prob
+
         print(dist, rating, choice.price, prob, choice.likes)
         if prob > best[0]:
             best = (prob, ind, dist)
