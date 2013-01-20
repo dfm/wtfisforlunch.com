@@ -9,3 +9,5 @@ export GOOGLE_WEB_KEY="WHATEVER"
 export MAIL_USERNAME="email@gmail.com"
 export MAIL_PASSWORD="smarta$$pa$$word"
 ```
+
+Also `mongodb` and `redis` should be running on default ports.
