@@ -1,3 +1,5 @@
+**Better documentation coming soon.**
+
 You'll need some environment variables set.
 
 ```
