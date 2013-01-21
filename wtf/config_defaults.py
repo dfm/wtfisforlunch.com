@@ -11,7 +11,7 @@ class WTFConfig(object):
                     .encode("utf-8")
 
     # Email stuff.
-    ADMIN_EMAILS = ["robot@wtfisforlunch.com", ]
+    ADMIN_EMAILS = [os.environ["MAIL_USERNAME"], ]
     EMAIL_CREDENTIALS = (os.environ["MAIL_USERNAME"],
                          os.environ["MAIL_PASSWORD"])
 
