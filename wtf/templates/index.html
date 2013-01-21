@@ -74,8 +74,10 @@
 
 
 <div id="footer">
-    {% if user %}<a href="{{ url_for("logout") }}">Log the fuck out.</a>
-    {% else %}<a href="{{ url_for("login") }}">Log the fuck in.</a>{% endif %}
+    {% if user %}<a href="{{ url_for("logout") }}">Log the fuck out</a>
+    or <a href="{{ url_for("about") }}">read about WTF this is</a>.
+    {% else %}Why don't you <a href="{{ url_for("login") }}">log the fuck in</a>
+    or <a href="{{ url_for("about") }}">read about WTF this is</a>?{% endif %}
 </div>
 
 {% endblock %}

@@ -29,6 +29,13 @@ def index_view():
                     user=user, proposal=proposal)
 
 
+def about_view():
+    user = login_ext.current_user
+    if not user.is_authenticated():
+        user = None
+    return flask.render_template("about.html")
+
+
 def share_view(short_url):
     prop = Proposal.c().find_one({"short_url": short_url})
     if prop is not None:
@@ -71,6 +78,7 @@ def create_app():
 
     # Attach routes.
     app.add_url_rule("/", "index", index_view)
+    app.add_url_rule("/about", "about", about_view)
     app.add_url_rule("/login", "login", login_handler)
     app.add_url_rule("/logout", "logout", logout_handler)
 
