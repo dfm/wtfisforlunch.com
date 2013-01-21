@@ -4,6 +4,10 @@
 
 <style>
 
+#subtitle p {
+    line-height: 1.3em;
+}
+
 #photo-of-me {
     content: "";
     display: block;
@@ -29,15 +33,21 @@
 <img src="">
 
 <div id="subtitle" style="display: block;">
+    <p>
     It tells you where to go for lunch by mixing your current location and
     your past choices up in a pot and adding some magic. The data comes from
     the <a href="https://foursquare.com">Foursquare</a> API (which is awesome)
-    and not from an evil company who's name rhymes with "kelp".<br><br>
+    and not from an evil company who's name rhymes with "kelp".
+    </p>
+    <p>
     This service <i>doesn't make recommendations</i>. Instead, it makes
-    <i>decisions</i>. This is great because making decisions sucks.<br><br>
+    <i>decisions</i>. This is great because making decisions sucks.
+    </p>
+    <p>
     Did I mention that it's
     <a href="https://github.com/dfm/wtfisforlunch.com">open source</a>.
     Rock it.
+    </p>
 </div>
 
 {% endblock %}

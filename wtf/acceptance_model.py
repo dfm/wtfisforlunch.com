@@ -13,67 +13,104 @@ class AcceptanceModel(object):
         self._muc = muc
         self._sc2 = sigmac2
 
+        self._rmarg = None
+        self._cmarg = None
+
     @property
     def pars(self):
         return np.array([self._sd2, self._sr2, self._muc, self._sc2])
 
     def predict(self, dn, rn, cn):
-        return np.exp(-self.loss(dn, rn, cn, True))
+        return np.exp(self.lnlike(dn, rn=rn, cn=cn, an=True))
 
-    def update(self, dn, rn, cn, an, eta=0.01):
-        v = self.pars
-        v -= eta * self.grad(dn, rn, cn, an)
+    # def update(self, dn, rn, cn, an, eta=0.01):
+    #     v = self.pars
+    #     v -= eta * self.grad(dn, rn, cn, an)
 
-        eps = 0.1
-        v[v < eps] = eps
+    #     eps = 0.1
+    #     v[v < eps] = eps
 
-        # Constraints on cost mean.
-        v[2] = min(4, v[2])
+    #     # Constraints on cost mean.
+    #     v[2] = min(4, v[2])
 
-        self.set_pars(v)
+    #     self.set_pars(v)
 
-    def loss(self, dn, rn, cn, an):
+    def _rating_prior(self, r):
+        # Z = sqrt(pi * sig^2 / 2) * (erf((10 - r0) / sqrt(2 * sig^2))
+        #                             + erf(r0 / sqrt(2 * sig^2)))
+        r0, s2 = 8.5, 2.0 * 2.0
+        lnZ = 1.3550776261638171
+        return -0.5 * (r - r0) ** 2 / s2 - lnZ
+
+    def _log_sum_exp(self, pr):
+        pr0 = np.max(pr)
+        return pr0 + np.log(np.sum(np.exp(pr - pr0))) - np.log(len(pr))
+
+    @property
+    def rmarg(self):
+        # Marginalize over rating.
+        if self._rmarg is None:
+            r = 10 * np.random.rand(1000)
+            pr = self._rating_prior(r) - 0.5 * (r - 10) ** 2 / self._sr2
+            self._rmarg = self._log_sum_exp(pr)
+        return self._rmarg
+
+    @property
+    def cmarg(self):
+        # Marginalize over cost.
+        if self._cmarg is None:
+            c = np.arange(1, 5)
+            pr = -0.5 * (c - self._muc) ** 2 / self._sc2
+            self._cmarg = self._log_sum_exp(pr)
+        return self._cmarg
+
+    def lnlike(self, dn, rn=None, cn=None, an=True):
         dn2 = dn * dn
-        E = 0.5 * (dn2 / self._sd2 + np.log(self._sd2))
+        E = -0.5 * dn2 / self._sd2
 
         if rn is not None:
             rn2 = (rn - 10) ** 2
-            E += 0.5 * (rn2 / self._sr2 + np.log(self._sr2))
+            E -= 0.5 * rn2 / self._sr2
+        else:
+            E += self.rmarg
 
         if cn is not None:
             cn2 = (cn - self._muc) ** 2
-            E += 0.5 * (cn2 / self._sc2 + np.log(self._sc2))
+            E -= 0.5 * cn2 / self._sc2
+        else:
+            E += self.cmarg
 
-        E = max(E, 0.0)
         if an:
             return E
+
+        assert 0
         return -np.log(1.0 - np.exp(-E))
 
-    def grad(self, dn, rn, cn, an):
-        dn2 = dn * dn
+    # def grad(self, dn, rn, cn, an):
+    #     dn2 = dn * dn
 
-        dldsd2 = 0.5 / self._sd2 - 0.5 * dn2 / self._sd2 / self._sd2
+    #     dldsd2 = 0.5 / self._sd2 - 0.5 * dn2 / self._sd2 / self._sd2
 
-        if rn is not None:
-            rn2 = (rn - 10) ** 2
-            dldsr2 = 0.5 / self._sr2 - 0.5 * rn2 / self._sr2 / self._sr2
-        else:
-            dldsr2 = 0.0
+    #     if rn is not None:
+    #         rn2 = (rn - 10) ** 2
+    #         dldsr2 = 0.5 / self._sr2 - 0.5 * rn2 / self._sr2 / self._sr2
+    #     else:
+    #         dldsr2 = 0.0
 
-        if cn is not None:
-            cn2 = (cn - self._muc) ** 2
-            dldmuc = (self._muc - cn) / self._sc2
-            dldsc2 = 0.5 / self._sc2 - 0.5 * cn2 / self._sc2 / self._sc2
-        else:
-            dldmuc = 0.0
-            dldsc2 = 0.0
+    #     if cn is not None:
+    #         cn2 = (cn - self._muc) ** 2
+    #         dldmuc = (self._muc - cn) / self._sc2
+    #         dldsc2 = 0.5 / self._sc2 - 0.5 * cn2 / self._sc2 / self._sc2
+    #     else:
+    #         dldmuc = 0.0
+    #         dldsc2 = 0.0
 
-        if an:
-            return np.array([dldsd2, dldsr2, dldmuc, dldsc2])
+    #     if an:
+    #         return np.array([dldsd2, dldsr2, dldmuc, dldsc2])
 
-        loss = self.loss(dn, rn, cn, True)
-        return np.array([dldsd2, dldsr2, dldmuc, dldsc2]) \
-               / (1.0 - np.exp(loss))
+    #     loss = self.loss(dn, rn, cn, True)
+    #     return np.array([dldsd2, dldsr2, dldmuc, dldsc2]) \
+    #            / (1.0 - np.exp(loss))
 
 
 if __name__ == "__main__":
