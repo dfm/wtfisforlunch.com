@@ -8,6 +8,10 @@
     line-height: 1.3em;
 }
 
+#subtitle h3 {
+    font-size: 64px;
+}
+
 #photo-of-me {
     content: "";
     display: block;
@@ -39,14 +43,44 @@
     the <a href="https://foursquare.com">Foursquare</a> API (which is awesome)
     and not from an evil company who's name rhymes with "kelp".
     </p>
+
     <p>
     This service <i>doesn't make recommendations</i>. Instead, it makes
     <i>decisions</i>. This is great because making decisions sucks.
     </p>
+
     <p>
     Did I mention that it's
     <a href="https://github.com/dfm/wtfisforlunch.com">open source</a>.
     Rock it.
+    </p>
+
+    <h3>How does it work?</h3>
+
+    <p><i>tl;dr</i> Magic.</p>
+
+    <p>
+    I have come up with (translation: pulled out of my ass) a parametric model
+    for the likelihood that you'll accept a suggestion that I present to you.
+    Assuming some simple priors, I can invert this likelihood function (using
+    <a href="http://en.wikipedia.org/wiki/Bayes'_theorem">Bayes</a>) and draw
+    "representative" restaurants from a distribution over distance, rating and
+    price from the Foursquare API. In practice, this sampling isn't actually
+    very rigorous. In fact, it's really
+    <a href="http://en.wikipedia.org/wiki/Kludge">kludgey</a> as fuck but we
+    do what we can :-).
+    </p>
+
+    <p>
+    This parametric model of the likelihood function has a few parameters
+    (duh!) and these can obviously be different for different users. Every
+    time you say yes or no, or rate a restaurant that you went to, this says
+    something about your preferences. In practice, each response that you make
+    should take
+    <a href="http://en.wikipedia.org/wiki/Stochastic_gradient_descent">a
+    gradient descent step</a> in the parameter space. This isn't actually live
+    yet but <a href="https://github.com/dfm/wtfisforlunch.com">the code</a> is
+    just about finished.
     </p>
 </div>
 

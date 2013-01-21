@@ -21,7 +21,8 @@ class AcceptanceModel(object):
         return np.array([self._sd2, self._sr2, self._muc, self._sc2])
 
     def predict(self, dn, rn, cn):
-        return np.exp(self.lnlike(dn, rn=rn, cn=cn, an=True))
+        ll = self.lnlike(dn, rn=rn, cn=cn, an=True)
+        return np.exp(ll)
 
     # def update(self, dn, rn, cn, an, eta=0.01):
     #     v = self.pars
