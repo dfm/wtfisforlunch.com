@@ -6,6 +6,7 @@ import flask
 import flask.ext.login as login_ext
 from flaskext.babel import Babel
 
+import re
 import os
 import logging
 
@@ -19,6 +20,12 @@ from wtf.models import User, Proposal
 
 
 babel = Babel()
+
+
+def get_locale():
+    if re.search(r"//polite\.", flask.request.url) is not None:
+        return "en_GB"
+    return flask.session.get("locale", "en_US")
 
 
 def javascript_view():
@@ -81,6 +88,8 @@ def create_app():
     app = flask.Flask(__name__)
     app.config.from_object("wtf.config_defaults.WTFConfig")
     babel.init_app(app)
+    babel.localeselector(get_locale)
+    print(babel.list_translations())
 
     # Add the blueprint(s).
     app.register_blueprint(api, url_prefix="/api")
