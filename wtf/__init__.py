@@ -21,6 +21,10 @@ from wtf.models import User, Proposal
 babel = Babel()
 
 
+def get_locale():
+    return flask.session.get("locale", "en_GB")
+
+
 def javascript_view():
     return flask.render_template("wtf.js")
 
@@ -81,6 +85,8 @@ def create_app():
     app = flask.Flask(__name__)
     app.config.from_object("wtf.config_defaults.WTFConfig")
     babel.init_app(app)
+    babel.localeselector(get_locale)
+    print(babel.list_translations())
 
     # Add the blueprint(s).
     app.register_blueprint(api, url_prefix="/api")

@@ -3,12 +3,11 @@
 # This file is distributed under the same license as the PROJECT project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2013.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2013-01-25 10:57-0500\n"
+"POT-Creation-Date: 2013-01-25 12:53-0500\n"
 "PO-Revision-Date: 2013-01-25 11:01-0500\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: en_GB <LL@li.org>\n"
@@ -46,7 +45,7 @@ msgstr "Heavens no!"
 msgid "log the fuck in"
 msgstr "log in, there's a good chap"
 
-#: templates/index.html:41
+#: templates/index.html:41 templates/wtf.js:97
 msgid "Where the fuck are you?"
 msgstr "I say, where on Earth are you?"
 
@@ -74,11 +73,27 @@ msgstr "had wonderful lunch at"
 msgid "4ln.ch"
 msgstr "4ln.ch/en_Gb"
 
+#: templates/wtf.js:46
+msgid "Why the fuck would you say no?"
+msgstr ""
+
+#: templates/wtf.js:82
+msgid "What the fuck kind of address is that?"
+msgstr ""
+
+#: templates/wtf.js:114
+msgid "Hang on. I'm loading your fucking lunch preferences…"
+msgstr ""
+
+#: templates/wtf.js:193
+msgid "Maybe you should just fucking stay home."
+msgstr ""
+
+#: templates/wtf.js:203 views/foursquare.py:277
+msgid "Fucking enjoy it!"
+msgstr "Have a lovely time!"
+
 #: views/foursquare.py:276
 msgid "Here's a goddamn map"
 msgstr "Perhaps you might like to look at this map?"
-
-#: views/foursquare.py:277
-msgid "Fucking enjoy it!"
-msgstr "Have a lovely time!"
 

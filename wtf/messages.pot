@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2013-01-25 10:57-0500\n"
+"POT-Creation-Date: 2013-01-25 12:53-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -45,7 +45,7 @@ msgstr ""
 msgid "log the fuck in"
 msgstr ""
 
-#: templates/index.html:41
+#: templates/index.html:41 templates/wtf.js:97
 msgid "Where the fuck are you?"
 msgstr ""
 
@@ -73,11 +73,27 @@ msgstr ""
 msgid "4ln.ch"
 msgstr ""
 
-#: views/foursquare.py:276
-msgid "Here's a goddamn map"
+#: templates/wtf.js:46
+msgid "Why the fuck would you say no?"
 msgstr ""
 
-#: views/foursquare.py:277
+#: templates/wtf.js:82
+msgid "What the fuck kind of address is that?"
+msgstr ""
+
+#: templates/wtf.js:114
+msgid "Hang on. I'm loading your fucking lunch preferences…"
+msgstr ""
+
+#: templates/wtf.js:193
+msgid "Maybe you should just fucking stay home."
+msgstr ""
+
+#: templates/wtf.js:203 views/foursquare.py:277
 msgid "Fucking enjoy it!"
+msgstr ""
+
+#: views/foursquare.py:276
+msgid "Here's a goddamn map"
 msgstr ""
 
