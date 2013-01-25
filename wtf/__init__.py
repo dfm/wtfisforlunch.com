@@ -23,7 +23,7 @@ babel = Babel()
 
 
 def get_locale():
-    if re.match(r"//polite\.", flask.request.url) is not None:
+    if re.search(r"//polite\.", flask.request.url) is not None:
         return "en_GB"
     return flask.session.get("locale", "en_US")
 
