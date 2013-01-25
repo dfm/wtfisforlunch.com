@@ -71,7 +71,7 @@ msgstr "had wonderful lunch at"
 
 #: templates/share.html:24
 msgid "4ln.ch"
-msgstr "4ln.ch/en_Gb"
+msgstr "p.4ln.ch"
 
 #: templates/wtf.js:46
 msgid "Why the fuck would you say no?"
