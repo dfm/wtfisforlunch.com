@@ -4,6 +4,7 @@ __all__ = ["create_app"]
 
 import flask
 import flask.ext.login as login_ext
+from flaskext.babel import Babel
 
 import os
 import logging
@@ -15,6 +16,13 @@ from wtf.views.foursquare import api
 from wtf.login import create_login, login_handler, logout_handler
 from wtf.error_handlers import TLSSMTPHandler
 from wtf.models import User, Proposal
+
+
+babel = Babel()
+
+
+def javascript_view():
+    return flask.render_template("wtf.js")
 
 
 def index_view():
@@ -72,12 +80,14 @@ def teardown_request(exception):
 def create_app():
     app = flask.Flask(__name__)
     app.config.from_object("wtf.config_defaults.WTFConfig")
+    babel.init_app(app)
 
     # Add the blueprint(s).
     app.register_blueprint(api, url_prefix="/api")
 
     # Attach routes.
     app.add_url_rule("/", "index", index_view)
+    app.add_url_rule("/wtf.js", "javascript", javascript_view)
     app.add_url_rule("/about", "about", about_view)
     app.add_url_rule("/login", "login", login_handler)
     app.add_url_rule("/logout", "logout", logout_handler)

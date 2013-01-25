@@ -1,6 +1,7 @@
 from __future__ import print_function, absolute_import, unicode_literals
 
 import flask
+from flaskext.babel import gettext
 import json
 import urllib
 
@@ -272,21 +273,23 @@ def accept(acceptid):
     prop.update_response(1)
 
     # Send the email.
+    fmt_args = (user, prop, gettext("Here's a goddamn map"),
+                gettext("Fucking enjoy it!"))
     text = """Hey {0.fullname},
 
 It looks like you're heading to {1.name} at {1.address}.
 
 For more info about this restaurant: {1.url}
 
-Here's a goddamn map: {1.map_link}
+{2}: {1.map_link}
 
-Fucking enjoy it.
+{3}
 
 Sincerely,
 The Lunch Robot
 robot@wtfisforlunch.com
 
-""".format(user, prop)
+""".format(*fmt_args)
 
     html = """<p>Hey {0.fullname},</p>
 
@@ -299,13 +302,13 @@ today.</p>
 <p style="text-align: center;">
 <a href="{1.map_link}"><img src="{1.map_url}" style="width: 640px;"></a></p>
 
-<p>Fucking enjoy it.</p>
+<p>{3}</p>
 
 <p>Sincerely,<br>
 The Lunch Robot<br>
 <a href="mailto:robot@wtfisforlunch.com">robot@wtfisforlunch.com</a></p>
 
-""".format(user, prop)
+""".format(*fmt_args)
 
     try:
         send_msg("{0.fullname} <{0.email}>".format(user), text,

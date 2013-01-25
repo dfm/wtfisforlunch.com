@@ -6,7 +6,7 @@
 {% block content %}
 
 <div id="supertitle">
-    {{ proposal.user.fullname }} had a fucking great lunch at
+    {{ proposal.user.fullname }} {{ gettext("had a fucking great lunch at") }}
 </div>
 
 <div id="title-wrapper">
@@ -21,7 +21,7 @@
 
 <div id="options" style="display: block;">
     Or share this link:
-    <a href="http://4ln.ch/{{ proposal.short_url }}">4ln.ch/{{ proposal.short_url }}</a>.
+    <a href="http://4ln.ch/{{ proposal.short_url }}">{{ gettext("4ln.ch") }}/{{ proposal.short_url }}</a>.
 </div>
 
 <div id="yelp-logo">

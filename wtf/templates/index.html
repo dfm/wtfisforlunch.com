@@ -20,9 +20,11 @@
         Did you ever end up going to
         <a href="{{ proposal.url }}" target="_blank">{{ proposal.name }}</a>?
         <br>
-        Yeah and it was <a href="javascript:WTF.report('{{ proposal._id }}', 2);">fucking awesome</a>
-        / <a href="javascript:WTF.report('{{ proposal._id }}', 1);">not the best</a> or
-        <a href="javascript:WTF.report('{{ proposal._id }}', 0);">hell no</a>.
+        Yeah and it was
+        <a href="javascript:WTF.report('{{ proposal._id }}', 2);">{{ gettext("fucking awesome") }}</a>
+        /
+        <a href="javascript:WTF.report('{{ proposal._id }}', 1);">not the best</a> or
+        <a href="javascript:WTF.report('{{ proposal._id }}', 0);">{{ gettext("Hell no.")|lower }}</a>
     </div>
     {% endif %}
 
@@ -31,12 +33,12 @@
 
 <div id="supertitle">
   {% if user %}Hi {{ user.fullname }}.{% else %}Hello stranger. Why don't you
-  <a href="{{ url_for("login") }}">log the fuck in</a>?{% endif %}
+  <a href="{{ url_for("login") }}">{{ gettext("log the fuck in") }}</a>?{% endif %}
 </div>
 
 <div id="title-wrapper">
     <div id="title">
-        Where the fuck are you?
+        {{ gettext("Where the fuck are you?") }}
     </div>
 </div>
 
@@ -57,9 +59,9 @@
 
 <div id="options">
     <ul>
-        <li><a href="javascript:WTF.accept();">Fuck yeah!</a></li>
-        <li><a href="javascript:WTF.reject();">Not today.</a></li>
-        <li><a href="javascript:WTF.blacklist();">Hell no.</a></li>
+        <li><a href="javascript:WTF.accept();">{{ gettext("Fuck yeah!") }}</a></li>
+        <li><a href="javascript:WTF.reject();">{{ gettext("Not today.") }}</a></li>
+        <li><a href="javascript:WTF.blacklist();">{{ gettext("Hell no.") }}</a></li>
     </ul>
 </div>
 
@@ -74,16 +76,16 @@
 
 
 <div id="footer">
-    {% if user %}<a href="{{ url_for("logout") }}">Log the fuck out</a>
-    or <a href="{{ url_for("about") }}">read about WTF this is</a>.
-    {% else %}Why don't you <a href="{{ url_for("login") }}">log the fuck in</a>
-    or <a href="{{ url_for("about") }}">read about WTF this is</a>?{% endif %}
+    {% if user %}<a href="{{ url_for("logout") }}">{{ gettext("Log the fuck out") }}</a>
+    or <a href="{{ url_for("about") }}">{{ gettext("read about WTF this is") }}</a>.
+    {% else %}Why don't you <a href="{{ url_for("login") }}">{{ gettext("log the fuck in") }}</a>
+    or <a href="{{ url_for("about") }}">{{ gettext("read about WTF this is") }}</a>?{% endif %}
 </div>
 
 {% endblock %}
 
 {% block scripts %}
 
-<script src="{{ url_for("static", filename="wtf.js") }}"></script>
+<script src="{{ url_for("javascript") }}"></script>
 
 {% endblock %}

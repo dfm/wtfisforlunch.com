@@ -43,7 +43,7 @@
     error: function (err) {
       // Handle the error.
       if (err.code == 1)
-        wtf.display_error("Why the fuck would you say no?");
+        wtf.display_error("{{ gettext("Why the fuck would you say no?") }}");
       else
         wtf.display_error("Something went wrong with geolocation.");
 
@@ -79,7 +79,7 @@
       } else {
         // That wasn't even anything like an address...
         $("#locform").show();
-        wtf.display_error("What the fuck kind of address is that?");
+        wtf.display_error("{{ gettext("What the fuck kind of address is that?") }}");
       }
     });
   };
@@ -94,7 +94,7 @@
   wtf.get_suggestion = function (url) {
     // Make sure that we *do* have coordinates of some sort.
     if (typeof wtf.coordinates === "undefined" || wtf.coordinates === null) {
-      wtf.display_error("Where the fuck are you?");
+      wtf.display_error("{{ gettext("Where the fuck are you?") }}");
       return;
     }
 
@@ -111,7 +111,7 @@
     $("#title-wrapper").off();
 
     // Show the loading message.
-    $("#status-message").text("Hang on. I'm loading your fucking lunch preferences…")
+    $("#status-message").text("{{ gettext("Hang on. I'm loading your fucking lunch preferences…") }}")
                         .show();
 
     // Send the request.
@@ -190,7 +190,7 @@
     error: function (msg) {
       $("#status-message").hide();
       $("#supertitle").text("Hmm… Something went wrong.").show();
-      $("#title").text("Maybe you should just fucking stay home.").show();
+      $("#title").text("{{ gettext("Maybe you should just fucking stay home.") }}").show();
       $("#subtitle")
         .html("<a href=\"javascript:WTF.get_suggestion();\">Try again.</a>")
         .show();
@@ -200,7 +200,7 @@
   // What to do about the suggestion.
   wtf.accept = function () {
     wtf.api_url = "/api/";
-    $("#subtitle").html("Fucking enjoy it! "
+    $("#subtitle").html("{{ gettext("Fucking enjoy it!") }} "
                         + "<a href=\"javascript:WTF.get_suggestion();\">"
                         + "Get another suggestion.</a>").show();
     $("#options").hide();

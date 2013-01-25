@@ -30,11 +30,11 @@
 
 {% block content %}
 
-<div id="supertitle">Hi. I'm <a href="http://dan.iel.fm">Dan</a>. I fucking
-    built <a href="{{ url_for("index") }}">this website</a>.</div>
+<div id="supertitle">Hi. I'm <a href="http://dan.iel.fm">Dan</a>.
+    {{ gettext("I fucking built") }}
+    <a href="{{ url_for("index") }}">this website</a>.</div>
 
 <div id="photo-of-me"></div>
-<img src="">
 
 <div id="subtitle" style="display: block;">
     <p>
@@ -46,7 +46,8 @@
 
     <p>
     This service <i>doesn't make recommendations</i>. Instead, it makes
-    <i>decisions</i>. This is great because making decisions sucks.
+    <i>decisions</i>.
+    {{ gettext("This is great because making your own decisions sucks.") }}
     </p>
 
     <p>
@@ -60,15 +61,15 @@
     <p><i>tl;dr</i> Magic.</p>
 
     <p>
-    I have come up with (translation: pulled out of my ass) a parametric model
+    I have come up with (translation: {{ gettext("pulled out of my ass") }})
+    a parametric model
     for the likelihood that you'll accept a suggestion that I present to you.
     Assuming some simple priors, I can invert this likelihood function (using
     <a href="http://en.wikipedia.org/wiki/Bayes'_theorem">Bayes</a>) and draw
     "representative" restaurants from a distribution over distance, rating and
     price from the Foursquare API. In practice, this sampling isn't actually
-    very rigorous. In fact, it's really
-    <a href="http://en.wikipedia.org/wiki/Kludge">kludgey</a> as fuck but we
-    do what we can :-).
+    very rigorous.
+    {{ gettext("In fact, it's really kludgey as fuck but we do what we can :-)") }}.
     </p>
 
     <p>

@@ -9,3 +9,4 @@ pymongo==2.4.1
 SimpleAES==1.0
 newrelic
 redis==2.7.2
+Flask-Babel==0.8
