@@ -1,0 +1,84 @@
+# English (United Kingdom) translations for PROJECT.
+# Copyright (C) 2013 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2013.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2013-01-25 10:57-0500\n"
+"PO-Revision-Date: 2013-01-25 11:01-0500\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: en_GB <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 0.9.6\n"
+
+#: templates/about.html:34
+msgid "I fucking built"
+msgstr ""
+
+#: templates/about.html:50
+msgid "This is great because making your own decisions sucks."
+msgstr ""
+
+#: templates/about.html:64
+msgid "pulled out of my ass"
+msgstr ""
+
+#: templates/about.html:72
+msgid "In fact, it's really kludgey as fuck but we do what we can :-)"
+msgstr ""
+
+#: templates/index.html:24
+msgid "fucking awesome"
+msgstr ""
+
+#: templates/index.html:27 templates/index.html:64
+msgid "Hell no."
+msgstr ""
+
+#: templates/index.html:36 templates/index.html:81
+msgid "log the fuck in"
+msgstr ""
+
+#: templates/index.html:41
+msgid "Where the fuck are you?"
+msgstr ""
+
+#: templates/index.html:62
+msgid "Fuck yeah!"
+msgstr ""
+
+#: templates/index.html:63
+msgid "Not today."
+msgstr ""
+
+#: templates/index.html:79
+msgid "Log the fuck out"
+msgstr ""
+
+#: templates/index.html:80 templates/index.html:82
+msgid "read about WTF this is"
+msgstr ""
+
+#: templates/share.html:9
+msgid "had a fucking great lunch at"
+msgstr ""
+
+#: templates/share.html:24
+msgid "4ln.ch"
+msgstr ""
+
+#: views/foursquare.py:276
+msgid "Here's a goddamn map"
+msgstr ""
+
+#: views/foursquare.py:277
+msgid "Fucking enjoy it!"
+msgstr ""
+
