@@ -6,6 +6,7 @@ import flask
 import flask.ext.login as login_ext
 from flaskext.babel import Babel
 
+import re
 import os
 import logging
 
@@ -22,7 +23,9 @@ babel = Babel()
 
 
 def get_locale():
-    return flask.session.get("locale", "en_GB")
+    if re.match(r"//polite\.", flask.request.url) is not None:
+        return "en_GB"
+    return flask.session.get("locale", "en_US")
 
 
 def javascript_view():
