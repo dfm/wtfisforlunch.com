@@ -20,65 +20,65 @@ msgstr ""
 
 #: templates/about.html:34
 msgid "I fucking built"
-msgstr ""
+msgstr "I lovingly crafted"
 
 #: templates/about.html:50
 msgid "This is great because making your own decisions sucks."
-msgstr ""
+msgstr "This is marvellous because making your own decisions is a real bore."
 
 #: templates/about.html:64
 msgid "pulled out of my ass"
-msgstr ""
+msgstr "pulled out of my hat"
 
 #: templates/about.html:72
 msgid "In fact, it's really kludgey as fuck but we do what we can :-)"
-msgstr ""
+msgstr "In fact, it's a little bit fudged, but one can't do everything :-)"
 
 #: templates/index.html:24
 msgid "fucking awesome"
-msgstr ""
+msgstr "splendid"
 
 #: templates/index.html:27 templates/index.html:64
 msgid "Hell no."
-msgstr ""
+msgstr "Heavens no!"
 
 #: templates/index.html:36 templates/index.html:81
 msgid "log the fuck in"
-msgstr ""
+msgstr "log in, there's a good chap"
 
 #: templates/index.html:41
 msgid "Where the fuck are you?"
-msgstr ""
+msgstr "I say, where on Earth are you?"
 
 #: templates/index.html:62
 msgid "Fuck yeah!"
-msgstr ""
+msgstr "Absolutely!"
 
 #: templates/index.html:63
 msgid "Not today."
-msgstr ""
+msgstr "Maybe not today, eh?"
 
 #: templates/index.html:79
 msgid "Log the fuck out"
-msgstr ""
+msgstr "I think I'd like to log out now, please"
 
 #: templates/index.html:80 templates/index.html:82
 msgid "read about WTF this is"
-msgstr ""
+msgstr "read about this terrific little project"
 
 #: templates/share.html:9
 msgid "had a fucking great lunch at"
-msgstr ""
+msgstr "had wonderful lunch at"
 
 #: templates/share.html:24
 msgid "4ln.ch"
-msgstr ""
+msgstr "4ln.ch/en_Gb"
 
 #: views/foursquare.py:276
 msgid "Here's a goddamn map"
-msgstr ""
+msgstr "Perhaps you might like to look at this map?"
 
 #: views/foursquare.py:277
 msgid "Fucking enjoy it!"
-msgstr ""
+msgstr "Have a lovely time!"
 
