@@ -89,7 +89,6 @@ def create_app():
     app.config.from_object("wtf.config_defaults.WTFConfig")
     babel.init_app(app)
     babel.localeselector(get_locale)
-    print(babel.list_translations())
 
     # Add the blueprint(s).
     app.register_blueprint(api, url_prefix="/api")

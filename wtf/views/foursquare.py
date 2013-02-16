@@ -75,7 +75,7 @@ def main(rejectid=None, blackid=None):
     # try:
     #     model = AcceptanceModel(*(user["model"]))
     # except (TypeError, KeyError):
-    model = AcceptanceModel(0.3, 2.0, 1.0, 3.0)
+    model = AcceptanceModel(0.6, 2.0, 1.0, 3.0)
 
     # Blacklist the proposal forever.
     if blackid is not None:
@@ -119,8 +119,6 @@ def main(rejectid=None, blackid=None):
             else:
                 proposal.update_response(0)
 
-    print("model", model.pars)
-
     # Parse the location coordinates.
     a = flask.request.args
     if "longitude" in a and "latitude" in a:
@@ -139,12 +137,8 @@ def main(rejectid=None, blackid=None):
             404)
 
     # Loop over the list of suggestions and accept or reject stochastically.
-    inds = np.arange(len(data))
-    np.random.shuffle(inds)
-    best = (0, None, None)
-    for ind in inds:
-        choice = data[ind]
-
+    probs = []
+    for ind, choice in enumerate(data):
         # Check the user blacklist.
         if user is not None:
             bl = user._doc.get("blacklist", [])
@@ -155,6 +149,22 @@ def main(rejectid=None, blackid=None):
         if flask.g.redis.sismember(rediskey, choice.id) != 0:
             continue
 
+        # Compute the distance.
+        cloc = choice.location
+        x1 = lnglat2xyz(cloc["longitude"], cloc["latitude"])
+        x2 = lnglat2xyz(*loc)
+        dist = np.sqrt(2 * (rearth * rearth - np.dot(x1, x2)))
+
+        # Down weight the probability if you have been there.
+        v = None
+        if user is not None:
+            v = Proposal.c().find_one({"user_id": user._id,
+                                       "accepted": {"$in": [2, -1]}})
+            if v is not None:
+                # HACKISH MAGIC.
+                probs.append((ind, 1e-10, dist))
+                continue
+
         # Get the aggregate user rating.
         n0, r0 = 5, choice.rating
         if r0 is not None:
@@ -163,42 +173,27 @@ def main(rejectid=None, blackid=None):
         else:
             rating = None
 
-        # Compute the distance.
-        cloc = choice.location
-        x1 = lnglat2xyz(cloc["longitude"], cloc["latitude"])
-        x2 = lnglat2xyz(*loc)
-        dist = np.sqrt(2 * (rearth * rearth - np.dot(x1, x2)))
-
         # Compute the predictive acceptance probability.
-        prob = model.predict(dist, rating, choice.price)
+        probs.append((ind, model.predict(dist, rating, choice.price), dist))
 
-        # Check if you've already been there.
-        v = None
-        if user is not None:
-            v = Proposal.c().find_one({"user_id": user._id,
-                                       "accepted": {"$in": [2, -1]}})
-
-        # Down weight the probability if you have been there.
-        if v is not None:
-            # HACKISH MAGIC.
-            prob = 0.1 * prob
-
-        print(dist, rating, choice.price, prob, choice.likes)
-        if prob > best[0]:
-            best = (prob, ind, dist)
-
-        # Accept stochastically.
-        if np.random.rand() <= prob:
-            best = (prob, ind, dist)
-            break
-
-    if best[1] is None:
+    if len(probs) == 0:
         # None of the restaurants had non-zero acceptance probability.
         return (json.dumps({"message":
             "We couldn't find any results. Maybe you should just stay home."}),
             404)
 
-    choice = data[best[1]]
+    # Draw from the list of probabilities.
+    inds, probs, dists = zip(*probs)
+    probs /= np.sum(probs)
+    sel = np.random.choice(inds, p=probs)
+    choice = data[sel]
+
+    for i, p in zip(inds, probs):
+        if i == sel:
+            s = "* "
+        else:
+            s = "  "
+        s += "{0:.2e} {1}".format(p, data[i].name)
 
     # Try and get the directions.
     # l = choice.location
@@ -234,11 +229,11 @@ def main(rejectid=None, blackid=None):
         "checkins": choice.checkins,
         "users": choice.users,
         "likes": choice.likes,
-        "probability": best[0],
-        "distance": best[2],
+        "probability": probs[sel],
+        "distance": dists[sel],
         "map_url": map_url,
-        "map_link": "http://maps.google.com/?q="
-                    + urllib.quote(choice.address.encode("utf-8"))
+        "map_link": "http://maps.google.com/?q={latitude},{longitude}"
+                                                .format(**choice.location)
     }
 
     # Save the proposal.
