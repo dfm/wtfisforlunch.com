@@ -75,19 +75,19 @@ msgstr "p.4ln.ch"
 
 #: templates/wtf.js:46
 msgid "Why the fuck would you say no?"
-msgstr ""
+msgstr "Why on Earth would you say no?"
 
 #: templates/wtf.js:82
 msgid "What the fuck kind of address is that?"
-msgstr ""
+msgstr "Well, look, what kind of address do you call that?"
 
 #: templates/wtf.js:114
-msgid "Hang on. I'm loading your fucking lunch preferences…"
-msgstr ""
+msgid "Hang on. I'm loading your fucking lunch preferences"
+msgstr "Do excuse me a moment, I'm loading your lunch preferences"
 
 #: templates/wtf.js:193
 msgid "Maybe you should just fucking stay home."
-msgstr ""
+msgstr "Have you perhaps considered just staying at home?"
 
 #: templates/wtf.js:203 views/foursquare.py:277
 msgid "Fucking enjoy it!"
