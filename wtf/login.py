@@ -1,75 +1,121 @@
-from __future__ import print_function, absolute_import, unicode_literals
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
-__all__ = ["check_login", "create_login", "login_handler", "logout_handler",
-           "current_user"]
+__all__ = ["login", "login_manager"]
 
-import os
+import urllib
+import requests
+
 import flask
-from flask.ext.openid import OpenID, COMMON_PROVIDERS
-import flask.ext.login as login_ext
+from flask.ext.login import (LoginManager, login_user, logout_user,
+                             login_required)
 
-from .models import User
+from .database import db
+from .models import User, hash_email
 
+login = flask.Blueprint("login", __name__)
 
-oid = OpenID()
-
-
-def check_login():
-    return (login_ext.current_user is not None
-                and login_ext.current_user.is_authenticated())
+login_manager = LoginManager()
+login_manager.login_view = "login.index"
 
 
-def current_user():
-    if check_login():
-        return login_ext.current_user
-    return None
+@login_manager.user_loader
+def load_user(userid):
+    return User.query.filter_by(id=userid).first()
 
 
-def load_user(_id):
-    return User.from_id(_id)
+@login.route("/oauth2callback")
+def oauth2callback():
+    error = flask.request.args.get("error", None)
+    if error is not None or "code" not in flask.request.args:
+        error = "Something went wrong and we couldn't log you in."
+        return flask.redirect(flask.url_for("frontend.index", error=error))
 
+    # Request a refresh code and an access code.
+    code = flask.request.args.get("code")
+    data = {
+        "code": code,
+        "client_id": flask.current_app.config["GOOGLE_OAUTH2_CLIENT_ID"],
+        "client_secret":
+        flask.current_app.config["GOOGLE_OAUTH2_CLIENT_SECRET"],
+        "redirect_uri": flask.url_for(".oauth2callback", _external=True),
+        "grant_type": "authorization_code",
+    }
+    r = requests.post(google_token_url, data=data)
+    if r.status_code != requests.codes.ok:
+        return flask.redirect(flask.url_for("frontend.index",
+                                            error="Something went wrong with "
+                                                  "the Google API."))
 
-def load_user_token(token):
-    return User.from_token(token)
+    # Parse the response.
+    data = r.json()
+    access_token = data.get("access_token")
+    refresh_token = data.get("refresh_token", None)
 
+    # Get the user information (email, id, etc.).
+    r = requests.get(google_info_url, params={"access_token": access_token})
+    data = r.json()
+    email = data.get("email")
 
-@oid.loginhandler
-def login_handler():
-    err = oid.fetch_error()
-    if err is not None:
-        return flask.redirect(flask.url_for(".index", error=err))
-
-    if check_login():
-        return flask.redirect(oid.get_next_url())
-
-    return oid.try_login(COMMON_PROVIDERS["google"],
-                         ask_for=["email", "fullname"])
-
-
-def logout_handler():
-    login_ext.logout_user()
-    return flask.redirect(flask.url_for(".index"))
-
-
-@oid.after_login
-def after_login(resp):
-    user = User.from_openid(resp.identity_url)
+    # Find the user entry if it already exists.
+    user = User.query.filter_by(email_hash=hash_email(email)).first()
     if user is None:
-        # Create a new user account.
-        user = User.new(**{"email": resp.email,
-                           "fullname": resp.fullname,
-                           "token": login_ext.make_secure_token(os.urandom(4),
-                                                                resp.email,
-                                                                os.urandom(4)),
-                           "openid": resp.identity_url})
-    login_ext.login_user(user)
-    return flask.redirect(oid.get_next_url())
+        if refresh_token is None:
+            error = ("The Google API didn't return a refresh token. "
+                     "Revoke access by clicking "
+                     "<a href='https://accounts.google.com/b/0/"
+                     "IssuedAuthSubTokens' target='_blank'>here</a> and then "
+                     "try again.")
+            return flask.redirect(flask.url_for("frontend.index", error=error))
+        user = User(email, refresh_token)
+
+    elif refresh_token is not None:
+        user.refresh_token = refresh_token
+
+    db.session.add(user)
+    db.session.commit()
+
+    login_user(user)
+
+    return flask.redirect(flask.url_for("frontend.index"))
 
 
-def create_login():
-    login_manager = login_ext.LoginManager()
-    login_manager.login_view = ".login"
-    login_manager.user_loader(load_user)
-    login_manager.token_loader(load_user_token)
+@login.route("/login")
+def index():
+    params = {
+        "response_type": "code",
+        "scope": "https://www.googleapis.com/auth/userinfo.email "
+                 "https://mail.google.com/",
+        "client_id": flask.current_app.config["GOOGLE_OAUTH2_CLIENT_ID"],
+        "redirect_uri": flask.url_for(".oauth2callback", _external=True),
+        "access_type": "offline",
+    }
+    return flask.redirect(google_oauth2_url
+                          + "?{0}".format(urllib.urlencode(params)))
 
-    return oid, login_manager
+
+@login.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return flask.redirect(flask.url_for("frontend.index"))
+
+
+@login.route("/unsubscribe")
+@login_required
+def unsubscribe():
+    user = flask.g.user
+    user.active = False
+    db.session.add(user)
+    db.session.commit()
+    return flask.redirect(flask.url_for("frontend.index"))
+
+
+@login.route("/resubscribe")
+@login_required
+def resubscribe():
+    user = flask.g.user
+    user.active = True
+    db.session.add(user)
+    db.session.commit()
+    return flask.redirect(flask.url_for("frontend.index"))
