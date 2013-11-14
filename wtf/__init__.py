@@ -33,8 +33,8 @@ def create_app(config_filename=None):
     app.before_request(before_request)
 
     # Bind the blueprints.
-    # from .frontend import frontend
-    # app.register_blueprint(frontend)
+    from .frontend import frontend
+    app.register_blueprint(frontend)
 
     from .login import login
     app.register_blueprint(login)

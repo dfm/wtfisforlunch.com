@@ -5,7 +5,7 @@ __all__ = ["User"]
 
 import flask
 from SimpleAES import SimpleAES
-from sqlalchemy import (Column, Integer, String, Decimal,
+from sqlalchemy import (Column, Integer, String, Float,
                         ForeignKey, Table)
 from sqlalchemy.orm import relationship
 
@@ -72,7 +72,7 @@ class User(db.Model):
             self.email = encrypt_email(email)
 
     def __repr__(self):
-        return "<User(\"{0}\")>".format(self.foursuqare_id)
+        return "<User(\"{0}\")>".format(self.foursquare_id)
 
     def get_email(self):
         if self.email is None:
@@ -100,8 +100,8 @@ class Venue(db.Model):
     foursquare_id = Column(String)
     name = Column(String)
     short_url = Column(String)
-    lat = Column(Decimal)
-    lng = Column(Decimal)
+    lat = Column(Float)
+    lng = Column(Float)
     address = Column(String)
     cross_street = Column(String)
     city = Column(String)
@@ -109,7 +109,7 @@ class Venue(db.Model):
     country = Column(String)
     postal_code = Column(String)
     price = Column(Integer)
-    rating = Column(Decimal)
+    rating = Column(Float)
 
     categories = relationship("Category", secondary=venue_categories,
                               backref="venues")
@@ -133,7 +133,7 @@ class Venue(db.Model):
         self.categories = categories
 
     def __repr__(self):
-        return "<Venue(\"{0}\")>".format(self.foursuqare_id)
+        return "<Venue(\"{0}\")>".format(self.foursquare_id)
 
 
 class Category(db.Model):
@@ -146,5 +146,11 @@ class Category(db.Model):
     plural_name = Column(String)
     short_name = Column(String)
 
+    def __init__(self, foursquare_id, name, plural_name, short_name):
+        self.foursquare_id = foursquare_id
+        self.name = name
+        self.plural_name = plural_name
+        self.short_name = short_name
+
     def __repr__(self):
-        return "<Category(\"{0}\")>".format(self.foursuqare_id)
+        return self.short_name

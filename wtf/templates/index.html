@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block hextra %}
+
+<script src="{{ url_for('static', filename='modernizer.js') }}"></script>
+
+{% endblock %}
+
+{% block content %}
+
+<div class="subtitle">
+    {% if g.user -%}Hi {% if g.user.first_name -%}{{ g.user.first_name }}{% else -%}friend{%- endif -%}.
+    {%- else -%}Hello stranger.
+    Why don't you <a href="{{ url_for('login.index') }}">log the fuck in</a>?
+    {% endif %}
+</div>
+<div class="title">
+    Where the fuck are you?
+</div>
+<div id="location">
+    <form action="javascript:geocode();">
+        <input type="text" size="30" name="loc" id="loc" placeholder="Enter a city, zipcode, whatever"></input>
+    </form>
+    <div id="geolocate">
+        <script>
+            if (Modernizr.geolocation)
+                document.write("or use <a href=\"javascript:geolocate();\">current location</a>.");
+        </script>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+
+<script src="{{ url_for('static', filename='zepto.min.js') }}"></script>
+
+<script>
+
+function get_next(lat, lng) {
+    return encodeURI("{{ url_for('.new') }}?lat="+lat+"&lng="+lng);
+}
+
+// Geo location
+function geolocate() {
+    navigator.geolocation.getCurrentPosition(locate_found, locate_error);
+}
+
+function locate_found (position) {
+    window.location.href = get_next(position.coords.latitude,
+                                    position.coords.longitude);
+}
+
+function locate_error (err) {
+    $("#geolocate").text("Well that didn't work for shit.");
+}
+
+function geocode () {
+    var loc = $("#loc").val();
+    $.ajax({
+        url: "https://maps.googleapis.com/maps/api/geocode/json",
+        data: {sensor: "false", address: loc},
+        dataType: "json",
+        success: function (data) {
+            if (data.results.length <= 0) return geocode_error();
+            geocode_results = data.results;
+            geocode_display(0);
+        },
+        error: geocode_error
+    });
+}
+
+var geocode_results = null;
+function geocode_display (ind) {
+    if (geocode_results == null || geocode_results.length <= ind)
+        return geocode_error();
+
+    var result = geocode_results[ind],
+        geo = result.geometry.location;
+    $("#location").html("Did you mean "
+        + result.formatted_address + "? "
+        + "<a href='"+get_next(geo.lat, geo.lng)+"'>Yep.</a> "
+        + "<a href='javascript:geocode_display("+(ind+1)+")'>Nope.</a>"
+    );
+
+}
+
+function geocode_error () {
+    $("#location").text("Well that didn't work for shit.");
+}
+
+</script>
+
+{% endblock %}
