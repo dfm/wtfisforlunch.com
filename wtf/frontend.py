@@ -37,14 +37,15 @@ def new():
         return flask.redirect(flask.url_for(".index"))
 
     # Get some proposed coordinates.
-    new_lat, new_lng = propose_position(lat, lng, 0.5)
+    new_lat, new_lng = propose_position(lat, lng, 0.25)
 
     # Get some recommendations.
     params = dict(
         ll="{0},{1}".format(new_lat, new_lng),
         section="food",
+        venuePhotos=1,
         v="20131113",
-        openNow=1,
+        # openNow=1,
         results=50,
     )
     if flask.g.user is not None:
@@ -89,7 +90,7 @@ def new():
         return resp
 
     # Compute the acceptance probabilities of the venues.
-    model = AcceptanceModel(0.5, 2.0, 1.0, 2.0)
+    model = AcceptanceModel(0.25, 3.0, 0.0, 1.0)
     probabilities = []
     for venue in venues:
         price = venue.get("price", {}).get("tier")
@@ -113,7 +114,8 @@ def new():
     venue = Venue.query.filter_by(foursquare_id=venue_dict["id"]).first()
     if venue is None:
         # Get the full listing.
-        [params.pop(k) for k in ["ll", "section", "openNow", "results"]]
+        [params.pop(k, None)
+         for k in ["ll", "section", "openNow", "results", "venuePhotos"]]
         r = requests.get(api_url("venues/"+venue_dict["id"]), params=params)
         if r.status_code != requests.codes.ok:
             flask.flash("Foursquare is always down. Fuck.", "error")

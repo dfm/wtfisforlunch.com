@@ -7,7 +7,7 @@ import flask
 from SimpleAES import SimpleAES
 from sqlalchemy import (Column, Integer, String, Float,
                         ForeignKey, Table)
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, backref
 
 from .database import db
 
@@ -46,6 +46,10 @@ blacklist = Table("blacklist", db.Model.metadata,
                   Column("user_id", Integer, ForeignKey("users.id")),
                   Column("venue_id", Integer, ForeignKey("venues.id")))
 
+accepted = Table("accepted", db.Model.metadata,
+                 Column("user_id", Integer, ForeignKey("users.id")),
+                 Column("venue_id", Integer, ForeignKey("venues.id")))
+
 
 # Data models.
 class User(db.Model):
@@ -59,8 +63,8 @@ class User(db.Model):
     email = Column(String)
     token = Column(String)
 
-    blacklist = relationship("Venue", secondary=blacklist,
-                             backref="blacklisters")
+    accepted = relationship("Venue", secondary=accepted)
+    blacklist = relationship("Venue", secondary=blacklist)
 
     def __init__(self, foursquare_id, first_name, last_name, token,
                  email=None):
@@ -90,6 +94,23 @@ class User(db.Model):
 
     def is_anonymous(self):
         return False
+
+
+class Weight(object):
+
+    __tablename__ = "weights"
+
+    id = Column(Integer, primary_key=True)
+    weight = Column(Float)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    user = relationship("User", backref=backref("weights", order_by=id))
+    category_id = Column(Integer, ForeignKey("categories.id"))
+    category = relationship("Category")
+
+    def __init__(self, user, category):
+        self.user = user
+        self.category = category
+        self.weight = 1.0
 
 
 class Venue(db.Model):
@@ -145,12 +166,14 @@ class Category(db.Model):
     name = Column(String)
     plural_name = Column(String)
     short_name = Column(String)
+    weight = Column(Float)
 
     def __init__(self, foursquare_id, name, plural_name, short_name):
         self.foursquare_id = foursquare_id
         self.name = name
         self.plural_name = plural_name
         self.short_name = short_name
+        self.weight = 1.0
 
     def __repr__(self):
         return self.short_name

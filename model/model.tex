@@ -1,0 +1,82 @@
+\documentclass[11pt]{article}
+\usepackage{booktabs}
+\usepackage{natbib}
+\usepackage{fullpage}
+\usepackage{fancyhdr}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{url}
+
+\usepackage{listings}
+\usepackage{color}
+\lstset{%
+        basicstyle=\footnotesize\ttfamily,
+        showspaces=false,
+        showstringspaces=false,
+        tabsize=2,
+        breaklines=false,
+        breakatwhitespace=true,
+        identifierstyle=\ttfamily,
+        keywordstyle=\color[rgb]{0,0,1},
+        commentstyle=\color[rgb]{0.133,0.545,0.133},
+        stringstyle=\color[rgb]{0.627,0.126,0.941},
+    }
+
+\usepackage{graphicx}
+\usepackage{qtree}
+
+% header
+\fancyhead{}
+\fancyfoot{}
+\fancyfoot[C]{\thepage}
+\fancyhead[R]{Daniel Foreman-Mackey}
+\fancyhead[L]{Description of probabilistic model for wtfisforlunch.com}
+\pagestyle{fancy}
+\setlength{\headsep}{10pt}
+\setlength{\headheight}{20pt}
+
+% shortcuts
+\newcommand{\Eq}[1]{Equation (\ref{eq:#1})}
+\newcommand{\eq}[1]{Equation (\ref{eq:#1})}
+\newcommand{\eqlabel}[1]{\label{eq:#1}}
+\newcommand{\Fig}[1]{Figure~\ref{fig:#1}}
+\newcommand{\fig}[1]{Figure~\ref{fig:#1}}
+\newcommand{\figlabel}[1]{\label{fig:#1}}
+
+\newcommand{\etal}{\emph{et al.}}
+
+\newcommand{\pr}[1]{\ensuremath{p\left (#1 \right )}}
+\newcommand{\lk}[1]{\ensuremath{\mathcal{L} \left ( #1 \right )}}
+\newcommand{\bvec}[1]{\ensuremath{\boldsymbol{#1}}}
+\newcommand{\dd}{\ensuremath{\, \mathrm{d}}}
+\newcommand{\normal}[2]{\ensuremath{\mathcal{N} \left ( #1; #2 \right ) }}
+\newcommand{\T}{^\mathrm{T}}
+
+\newcommand{\data}{\mathcal{D}}
+\newcommand{\code}[1]{{\sffamily #1}}
+\DeclareMathOperator*{\argmax}{arg\,max}
+
+
+\begin{document}
+
+The problem that we're trying to solve is: given a list of restaurants with
+distances ($D$), ratings ($R$), cost ($C$), and type ($T$), how do we choose a
+restaurant that the user will want to go to.
+In practice, I will assert a parametric form for the likelihood of a user
+($u$) accepting ($a=1$) the restaurant and then we will learn the parameters
+of the model based on their behavior.
+The model that I have chosen is
+\begin{eqnarray}
+p(a\,|\,D,R,C,T;\,u) &=&
+    p(a\,|\,D;\,u)\,p(a\,|\,R;\,u)\,p(a\,|\,C;\,u)\,p(a\,|\,T;\,u)
+\end{eqnarray}
+where
+\begin{eqnarray}
+p(a\,|\,D;\,u) &=& \mathcal{N}(D;\,0,\,\sigma_D^2) \quad, \\
+p(a\,|\,R;\,u) &=& \mathcal{N}(R;\,10,\,\sigma_R^2) \quad, \\
+p(a\,|\,C;\,u) &=& \mathcal{N}(C;\,\mu_C,\,\sigma_C^2) \quad,\quad\mbox{and} \\
+p(a\,|\,T;\,u) &=& \frac{1}{\sum_k \theta_k}\prod_k \theta_k^{\mathbf{1}[T==k]}
+\end{eqnarray}
+
+\end{document}

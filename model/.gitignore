@@ -1,0 +1,9 @@
+*.aux
+*.log
+*.out
+*.bbl
+*.blg
+*.dvi
+*.ps
+*.eps
+model.pdf
