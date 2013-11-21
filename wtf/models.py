@@ -96,23 +96,6 @@ class User(db.Model):
         return False
 
 
-class Weight(object):
-
-    __tablename__ = "weights"
-
-    id = Column(Integer, primary_key=True)
-    weight = Column(Float)
-    user_id = Column(Integer, ForeignKey("users.id"))
-    user = relationship("User", backref=backref("weights", order_by=id))
-    category_id = Column(Integer, ForeignKey("categories.id"))
-    category = relationship("Category")
-
-    def __init__(self, user, category):
-        self.user = user
-        self.category = category
-        self.weight = 1.0
-
-
 class Venue(db.Model):
 
     __tablename__ = "venues"
@@ -173,7 +156,7 @@ class Category(db.Model):
         self.name = name
         self.plural_name = plural_name
         self.short_name = short_name
-        self.weight = 1.0
+        self.weight = 0.0
 
     def __repr__(self):
         return self.short_name

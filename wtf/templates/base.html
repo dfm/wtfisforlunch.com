@@ -16,6 +16,16 @@
 </head>
 <body>
 
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <div id="error-message">
+        <div id="error-message-inner">
+            <strong>Error</strong>: {{ messages[0] }}
+        </div>
+    </div>
+    {% endif %}
+    {% endwith %}
+
     {% block content %}{% endblock %}
 
     <div id="footer">

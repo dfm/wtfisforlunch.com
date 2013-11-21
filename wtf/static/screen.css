@@ -21,6 +21,24 @@ a:hover {
     color: #0E5C9E;
 }
 
+#error-message {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    text-align: center;
+}
+
+#error-message-inner {
+    display: inline-block;
+    padding: 10px 15px;
+    color: rgb(250, 50, 50);
+    border: 3px solid rgb(250, 50, 50);
+    border-top-width: 0;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
 #foursquare {
     position: fixed;
     top: 8px;

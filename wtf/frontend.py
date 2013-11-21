@@ -6,14 +6,14 @@ __all__ = ["frontend"]
 import flask
 
 import requests
-from math import exp
+from math import log, exp
 from random import random
 
-from .database import db
 from .utils import api_url
 from .geo import propose_position
 from .models import Venue, Category
 from .acceptance import AcceptanceModel
+from .database import db, get_redis, format_key
 
 frontend = flask.Blueprint("frontend", __name__)
 
@@ -66,16 +66,31 @@ def new():
 
     # Get the blacklisted venues.
     blacklisted = []
+    bl = None
     if flask.g.user is not None:
         blacklisted = [v.foursquare_id for v in flask.g.user.blacklist]
         bl = flask.request.args.get("blacklist")
         if bl is not None and bl not in blacklisted:
             blacklisted.append(bl)
-            v = Venue.query.filter_by(foursquare_id=bl).first()
-            if v is not None:
+
+    # Update the category weights.
+    rpipe = get_redis().pipeline()
+    key = format_key("category")
+    if rej is not None or bl is not None:
+        _id = rej or bl
+        v = Venue.query.filter_by(foursquare_id=_id).first()
+        if v is not None:
+            [rpipe.zincrby(key, c.foursquare_id,
+                           -2 if rej is None else -1)
+             for c in v.categories]
+            rpipe.execute()
+
+            # Update the user blacklist.
+            if bl is not None:
                 flask.g.user.blacklist.append(v)
                 db.session.add(flask.g.user)
-                db.session.commit()
+
+            db.session.commit()
 
     # Parse the venues.
     data = r.json()
@@ -93,11 +108,19 @@ def new():
     model = AcceptanceModel(0.25, 3.0, 0.0, 1.0)
     probabilities = []
     for venue in venues:
+        # Compute the metadata probability.
         price = venue.get("price", {}).get("tier")
         rating = venue.get("rating")
         loc = venue["location"]
         distance = loc["distance"] / 1000
-        probabilities.append(exp(model.lnlike(distance, rating, price)))
+        lnlike = model.lnlike(distance, rating, price)
+
+        # Compute the category score.
+        cids = [c["id"] for c in venue["categories"]]
+        [rpipe.zscore(key, i) for i in cids]
+        lnlike -= sum([log(1+exp(-0.1*val)) if val else log(2)
+                       for val in rpipe.execute()])
+        probabilities.append(exp(lnlike))
 
     # Select a venue by simulating a multinomial distribution.
     norm = sum(probabilities)
@@ -163,3 +186,31 @@ def new():
         resp.set_cookie("rejected", " ".join(rejected))
 
     return resp
+
+
+@frontend.route("/accept/<venue>")
+def accept(venue):
+    v = Venue.query.filter_by(foursquare_id=venue).first()
+    if v is None:
+        return flask.abort(404)
+
+    rpipe = get_redis().pipeline()
+    key = format_key("category")
+    [rpipe.zincrby(key, c.foursquare_id, 2) for c in v.categories]
+    rpipe.execute()
+
+    if flask.g.user is not None and v not in flask.g.user.accepted:
+        flask.g.user.accepted.append(v)
+        db.session.add(flask.g.user)
+        db.session.commit()
+
+    return flask.redirect(flask.url_for(".lunch", foursquare_id=venue))
+
+
+@frontend.route("/<foursquare_id>")
+def lunch(foursquare_id):
+    v = Venue.query.filter_by(foursquare_id=foursquare_id).first()
+    if v is None:
+        return flask.abort(404)
+
+    return flask.render_template("lunch.html", venue=v)

@@ -7,25 +7,19 @@
 {% block content %}
 
 <div class="subtitle">
-    It looks like lunch is going to be at
+    Today's lunch is going to be at fucking
 </div>
 <div class="title">
     <a href="{{ venue.short_url }}" target="_blank">{{ venue.name }}</a>
 </div>
 <div class="subtitle">
-    <ul>
-        <li><a href="{{ url_for('.accept', venue=venue.foursquare_id) }}">Fuck yeah!</a></li>
-        <li><a href="{{ url_for('.new', reject=venue.foursquare_id, lat=lat, lng=lng) }}">Not today.</a></li>
-        {% if g.user %}
-        <li><a href="{{ url_for('.new', blacklist=venue.foursquare_id, lat=lat, lng=lng) }}">Hell no.</a></li>
-        {% endif %}
-    </ul>
+    or you can <a href="{{ url_for('.index') }}">try it out for yourself</a>.
 </div>
 <div class="info">
     <ul>
         <li><strong>{{ venue.name }}</strong></li>
         <li><i>{{ venue.categories|join(', ') }}</i></li>
-        <li><i>{{ venue.address }}{% if venue.cross_street %} ({{ venue.cross_street }}){% endif %}, {{ venue.city }}, {{ venue.state }} ({{ distance }})</i></li>
+        <li><i>{{ venue.address }}{% if venue.cross_street %} ({{ venue.cross_street }}){% endif %}, {{ venue.city }}, {{ venue.state }}</i></li>
         {% if venue.rating or venue.price %}
         <li><i>
         {% if venue.rating %}
@@ -42,9 +36,5 @@
 <a href="http://maps.google.com/?q={{ venue.address }}, {{ venue.city }}, {{ venue.state }}, {{ venue.country }}" target="_blank">
     <div id="map" style="background-image: url('http://maps.googleapis.com/maps/api/staticmap?size=640x200&zoom=15&scale=2&sensor=false&markers=label:B|{{ venue.lat }},{{ venue.lng }}');"></div>
 </a>
-
-{% endblock %}
-
-{% block scripts %}
 
 {% endblock %}
