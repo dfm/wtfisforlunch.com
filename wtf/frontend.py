@@ -23,6 +23,11 @@ def index():
     return flask.render_template("index.html")
 
 
+@frontend.route("/about")
+def about():
+    return flask.render_template("about.html")
+
+
 @frontend.route("/new")
 def new():
     # Parse the latitude and longitude.

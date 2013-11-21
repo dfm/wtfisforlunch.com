@@ -32,10 +32,10 @@
         {% if g.user %}
         <a href="{{ url_for('login.logout') }}">Log the fuck out</a>
         or
-        read about what the fuck this is.
+        <a href="{{ url_for('.about') }}">read about what the fuck this is</a>.
         {% else %}
         Why don't you <a href="{{ url_for('login.index') }}">log the fuck in</a>
-        or read about what the fuck this is?
+        or <a href="{{ url_for('.about') }}">read about what the fuck this is</a>?
         {% endif %}
     </div>
 
