@@ -2,3 +2,7 @@
 .DS_Store
 venv
 local.py
+build
+dist
+*.egg-info
+analytics.html

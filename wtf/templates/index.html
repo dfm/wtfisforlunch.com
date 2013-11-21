@@ -44,6 +44,7 @@ function get_next(lat, lng) {
 // Geo location
 function geolocate() {
     navigator.geolocation.getCurrentPosition(locate_found, locate_error);
+    $("#geolocate").text("I'm fucking working on it…");
 }
 
 function locate_found (position) {
